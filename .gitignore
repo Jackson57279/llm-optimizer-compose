@@ -1,0 +1,48 @@
+# Python / tooling
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.eggs/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets / env
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Engine binaries and caches (installed by scripts/engines/*.ps1)
+engines/llama-cpp-vulkan/
+engines/ik-llama/
+engines/_obs/
+
+# Model weights and HF caches (huge; keep outside git)
+models/
+gguf/
+huggingface/
+
+# Runtime state
+logs/
+data/
+bench/results/*.json
+
+# OS / misc
+Thumbs.db
+
+# Keep placeholders
+!engines/.gitkeep
+!bench/results/.gitkeep
+gemma-4-E4B

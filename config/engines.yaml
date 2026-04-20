@@ -1,0 +1,229 @@
+# Engine × model × route matrix consumed by src/miniforge/launcher/engine_manager.py.
+#
+# Substitutions: ${MODEL_DIR} and any env var. ${MODEL_PATH} / ${MODEL_PATH_IK}
+# are filled in per-model when an engine is launched.
+#
+# Defaults assume:
+#   MODEL_DIR     = C:\Users\midwe\miniforge\gguf   (pre-existing MiniMax UD-IQ2_XXS lives here)
+#   MODEL_DIR_REAP = D:\ai\models                   (56GB REAP Q2_K goes here once downloaded)
+
+defaults:
+  threads: 8
+  threads_batch: 16
+  context: 4096
+  host: "127.0.0.1"
+
+# --------------------------------------------------------------------------
+# Engines
+# --------------------------------------------------------------------------
+engines:
+  # llama.cpp Vulkan build — primary iGPU-accelerated engine for any MoE model
+  # that llama.cpp supports (minimax-m2 is in mainline). --cpu-moe keeps the
+  # experts on CPU/RAM, -ngl 20 puts attention + shared experts + router on the
+  # Radeon 680M. Tweak -ngl down if you hit Vulkan OOM on the iGPU.
+  llama_vulkan:
+    kind: binary
+    binary: "./engines/llama-cpp-vulkan/llama-server.exe"
+    port: 8001
+    health_path: "/health"
+    ready_timeout_s: 600          # big MoE models take a while to mmap
+    args:
+      - -m
+      - "${MODEL_PATH}"
+      - -c
+      - "8192"                     # bumped from 4096; KV is q8_0 so fits
+      - -ngl
+      - "20"
+      - --flash-attn
+      - --metrics
+      - --cpu-moe
+      - -ot
+      - "blk\\.[0-9]+\\.ffn_(up|down|gate)_exps=CPU"
+      - --cache-type-k             # quantize KV → ~2x cache savings on iGPU
+      - "q8_0"
+      - --cache-type-v
+      - "q8_0"
+      - --mmap
+      - --no-warmup                # skip warmup pass → faster engine swap
+      - -t
+      - "8"                         # 8 physical P-cores on 6850H
+      - -tb
+      - "16"                        # batch phase can use SMT
+      - -b
+      - "2048"                      # bigger logical batch → better PP throughput
+      - -ub
+      - "512"                       # 4:1 batch:ubatch ratio is sweet spot
+      - --parallel
+      - "1"
+      - --cont-batching
+      - --host
+      - "127.0.0.1"
+      - --port
+      - "8001"
+
+  # ik_llama.cpp — community fork with the IQ1_S_R4 / IQ2_KS quants and
+  # --fused-moe / -rtr optimizations that historically add +30% TG over mainline
+  # on sub-2-bit MoE. CPU only; no iGPU offload.
+  ik_llama:
+    kind: binary
+    binary: "./engines/ik-llama/llama-server.exe"
+    port: 8002
+    health_path: "/health"
+    ready_timeout_s: 600
+    args:
+      - -m
+      - "${MODEL_PATH_IK}"
+      - -c
+      - "4096"
+      - -ngl
+      - "0"
+      - --flash-attn
+      - --metrics
+      - --fused-moe
+      - --cpu-moe
+      - -rtr
+      - -ot
+      - "blk\\.[0-9]+\\.ffn_(up|down|gate)_exps=CPU"
+      - -mla
+      - "2"
+      - --mmap
+      - -t
+      - "8"
+      - -tb
+      - "16"
+      - --host
+      - "127.0.0.1"
+      - --port
+      - "8002"
+
+  # miniforge — our own Python library wrapped in a FastAPI OpenAI server.
+  # Lowest-overhead CPU baseline, uses llama-cpp-python.
+  miniforge:
+    kind: python
+    module: miniforge.server.openai_server
+    port: 8003
+    health_path: "/health"
+    ready_timeout_s: 900          # includes first-time GGUF download
+    args:
+      - --model
+      - "${MODEL_PATH}"
+      - --host
+      - "127.0.0.1"
+      - --port
+      - "8003"
+    env:
+      MINIFORGE_CONFIG: "configs/m7-optimized.yaml"
+      MINIFORGE_DOWNLOAD_DIR: "${MODEL_DIR}"
+      MINIFORGE_LOG_LEVEL: "info"
+
+  # miniforge_airllm — same miniforge server module, but with the AirLLM backend
+  # (layer-streamed inference over HF safetensors). AirLLM cannot load GGUF, so
+  # this engine ignores ${MODEL_PATH} and resolves the model via MINIFORGE_MODEL_ID
+  # (an HF repo id). Expect ~0.3 tok/s on a 161B-class model.
+  miniforge_airllm:
+    kind: python
+    module: miniforge.server.openai_server
+    port: 8004
+    health_path: "/health"
+    ready_timeout_s: 1800         # re-sharding a dense model takes a while
+    args:
+      - --backend
+      - "airllm"
+      - --host
+      - "127.0.0.1"
+      - --port
+      - "8004"
+    env:
+      MINIFORGE_BACKEND: "airllm"
+      MINIFORGE_MODEL_ID: "MiniMaxAI/MiniMax-M2.7"
+      MINIFORGE_LOG_LEVEL: "info"
+      AIRLLM_COMPRESSION: "4bit"
+      AIRLLM_MAX_CTX: "1024"
+      AIRLLM_SHARDS_DIR: "${MODEL_DIR}/airllm-shards"
+
+# --------------------------------------------------------------------------
+# Models — concrete GGUF paths
+# --------------------------------------------------------------------------
+models:
+  # Full MiniMax-M2.7 228B at Unsloth UD-IQ2_XXS (~61 GB, 3 shards).
+  # NOTE: This is the file you already have in C:\Users\midwe\miniforge\gguf\UD-IQ2_XXS\.
+  # Point $env:MODEL_DIR at that folder (or its parent) and the first shard will resolve.
+  minimax-m27-full-ud-iq2xxs:
+    path: "${MODEL_DIR}/UD-IQ2_XXS/MiniMax-M2.7-UD-IQ2_XXS-00001-of-00003.gguf"
+    path_ik: "${MODEL_DIR}/UD-IQ2_XXS/MiniMax-M2.7-UD-IQ2_XXS-00001-of-00003.gguf"
+    size_gb: 61
+
+  # 0xSero REAP-pruned 161B at Q2_K (~56 GB, single file or splits).
+  # `pull-models.ps1` drops it into ${MODEL_DIR_REAP}/MiniMax-M2.7-161B-REAP-Q2_K/.
+  minimax-reap-q2k:
+    path: "${MODEL_DIR_REAP}/MiniMax-M2.7-161B-REAP-GGUF/MiniMax-M2.7-161B-REAP-Q2_K.gguf"
+    path_ik: "${MODEL_DIR_REAP}/MiniMax-M2.7-161B-REAP-GGUF/MiniMax-M2.7-161B-REAP-IQ2_KS.gguf"
+    size_gb: 56
+
+  # Qwen3-30B-A3B UD-Q4_K_M — fast control (fits fully in RAM, 12-18 t/s on Vulkan).
+  qwen3-30b-a3b-q4km:
+    path: "${MODEL_DIR}/Qwen3-30B-A3B-Instruct-GGUF/Qwen3-30B-A3B-Instruct-UD-Q4_K_M.gguf"
+    path_ik: "${MODEL_DIR}/Qwen3-30B-A3B-Instruct-GGUF/Qwen3-30B-A3B-Instruct-UD-Q4_K_M.gguf"
+    size_gb: 18
+
+  # Gemma-4-E4B (OBLITERATED Q4_K_M) — 4-bit quantized, ~8-12GB
+  gemma-4-e4b-q4km:
+    path: "D:/llm-optimizer-compose/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-Q4_K_M.gguf"
+    path_ik: "D:/llm-optimizer-compose/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-Q4_K_M.gguf"
+    size_gb: 10
+
+# --------------------------------------------------------------------------
+# Routes — aliases published at /v1/models (LiteLLM and Open WebUI see these)
+# --------------------------------------------------------------------------
+routes:
+  # MiniMax-M2.7 FULL (the model you already have on disk)
+  minimax-m27-full-vulkan:
+    engine: llama_vulkan
+    model: minimax-m27-full-ud-iq2xxs
+    ttl_s: 1200
+  minimax-m27-full-miniforge:
+    engine: miniforge
+    model: minimax-m27-full-ud-iq2xxs
+    ttl_s: 1200
+
+  # MiniMax-M2.7 REAP-161B (to be downloaded by pull-models.ps1)
+  minimax-reap-vulkan:
+    engine: llama_vulkan
+    model: minimax-reap-q2k
+    ttl_s: 1200
+  minimax-reap-ikllama:
+    engine: ik_llama
+    model: minimax-reap-q2k
+    ttl_s: 1200
+  minimax-reap-miniforge:
+    engine: miniforge
+    model: minimax-reap-q2k
+    ttl_s: 1200
+  minimax-reap-airllm:
+    engine: miniforge_airllm
+    model: minimax-reap-q2k
+    ttl_s: 1200
+
+  # Small control — always fast, good for quick smoke tests
+  qwen3-30b-vulkan:
+    engine: llama_vulkan
+    model: qwen3-30b-a3b-q4km
+    ttl_s: 300
+  qwen3-30b-miniforge:
+    engine: miniforge
+    model: qwen3-30b-a3b-q4km
+    ttl_s: 300
+
+  # Gemma-4-E4B routes
+  gemma-4-e4b-vulkan:
+    engine: llama_vulkan
+    model: gemma-4-e4b-q4km
+    ttl_s: 600
+  gemma-4-e4b-ikllama:
+    engine: ik_llama
+    model: gemma-4-e4b-q4km
+    ttl_s: 600
+  gemma-4-e4b-miniforge:
+    engine: miniforge
+    model: gemma-4-e4b-q4km
+    ttl_s: 600

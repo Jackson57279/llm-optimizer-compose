@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from miniforge.core.backends.llama_cpp import LlamaCppBackend; print\\('llama_cpp OK'\\)\")",
+      "Bash(python -c \"from miniforge.models.registry import get_registry; r = get_registry\\(\\); info = r.get_model_info\\('unsloth/MiniMax-M2.7-GGUF'\\); print\\(f'Registry OK: is_moe={info.is_moe}, params={info.params_billions}B'\\)\")",
+      "Bash(python -c \"from miniforge.core.memory import MemoryManager; m = MemoryManager\\(\\); ctx = m.compute_moe_context\\(61.0\\); print\\(f'Memory OK: computed n_ctx={ctx}'\\)\")",
+      "Bash(python -c \"from miniforge.utils.config import M7Config; c = M7Config\\(\\); print\\(f'Config OK: cache_k={c.cache_type_k}, quant={c.quantization}'\\)\")"
+    ]
+  }
+}

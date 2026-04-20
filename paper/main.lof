@@ -1,0 +1,11 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces Efficiency-Quality Pareto Frontier}}{13}{figure.caption.7}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Miniforge System Architecture}}{15}{figure.caption.8}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Vision Processing Pipeline}}{40}{figure.caption.31}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Token Generation Throughput by Prompt Type. The dashed red line indicates the 10 tok/s target.}}{49}{figure.caption.36}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Prompt Processing Speed vs Context Length}}{51}{figure.caption.39}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Memory Usage Breakdown by Component}}{52}{figure.caption.41}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Needle-in-Haystack Retrieval Accuracy vs Context Length}}{53}{figure.caption.43}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Quality Metrics by Task Type. The dashed red line indicates the 85\% quality target.}}{54}{figure.caption.45}%
+\contentsline {figure}{\numberline {9}{\ignorespaces Quantization Trade-off: Quality vs Memory Consumption}}{55}{figure.caption.47}%
+\contentsline {figure}{\numberline {10}{\ignorespaces Backend Comparison: Token Generation Throughput}}{56}{figure.caption.49}%
+\contentsline {figure}{\numberline {11}{\ignorespaces Target Achievement Summary: Performance Ratios (values $>$1.0 indicate target exceeded)}}{57}{figure.caption.51}%

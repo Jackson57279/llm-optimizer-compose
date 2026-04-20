@@ -1,0 +1,123 @@
+\section{Appendix A: Detailed Benchmark Results}
+\label{appendix:benchmarks}
+
+\subsection{Raw Performance Data}
+
+Complete benchmark results with all iterations.
+
+\begin{longtable}{cccccc}
+\caption{Complete Throughput Benchmark Results} \\
+\toprule
+\textbf{Run} & \textbf{Prompt} & \textbf{Tokens} & \textbf{Time (s)} & \textbf{Tok/s} & \textbf{Notes} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule
+\textbf{Run} & \textbf{Prompt} & \textbf{Tokens} & \textbf{Time (s)} & \textbf{Tok/s} & \textbf{Notes} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{Continued on next page} \\
+\endfoot
+\bottomrule
+\endlastfoot
+1 & code & 512 & 22.8 & 22.5 & warmup \\
+2 & code & 512 & 21.9 & 23.4 & - \\
+3 & code & 512 & 23.1 & 22.2 & - \\
+4 & code & 512 & 22.5 & 22.8 & - \\
+5 & code & 512 & 22.7 & 22.6 & - \\
+6 & qa & 512 & 25.9 & 19.8 & - \\
+7 & qa & 512 & 26.2 & 19.5 & - \\
+8 & qa & 512 & 25.5 & 20.1 & - \\
+9 & qa & 512 & 26.1 & 19.6 & - \\
+10 & qa & 512 & 25.8 & 19.8 & - \\
+\end{longtable}
+
+\subsection{Memory Profiling Traces}
+
+Sample memory profiling data during generation.
+
+\begin{verbatim}
+Timestamp (s)  RSS (MB)  Delta (MB)  Event
+0.000         1350.2     0.0         Start
+0.100         1423.5    73.3         Context processing
+0.200         1456.1    32.6         Generation start
+0.300         1478.9    22.8         Token 1
+0.400         1481.2     2.3         Token 2
+...
+12.500        1482.5     0.1         Generation complete
+\end{verbatim}
+
+\subsection{Context Retrieval Detailed Results}
+
+\begin{longtable}{cccccc}
+\caption{Needle-in-Haystack Detailed Results} \\
+\toprule
+\textbf{Context} & \textbf{Depth} & \textbf{Needle} & \textbf{Response} & \textbf{Correct} & \textbf{Latency} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule
+\textbf{Context} & \textbf{Depth} & \textbf{Needle} & \textbf{Response} & \textbf{Correct} & \textbf{Latency} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{Continued on next page} \\
+\endfoot
+\bottomrule
+\endlastfoot
+4096 & 0.0 & Passcode & 8742 & Yes & 45ms \\
+4096 & 0.5 & Dr. Chen & Sarah Chen & Yes & 52ms \\
+4096 & 1.0 & Location & library & Yes & 48ms \\
+65536 & 0.0 & Passcode & 8742 & Yes & 320ms \\
+65536 & 0.5 & Dr. Chen & Sarah & Partial & 345ms \\
+65536 & 1.0 & Location & downtown & Partial & 338ms \\
+\end{longtable}
+
+\subsection{Quality Benchmark Raw Data}
+
+Complete QA test results with responses.
+
+\begin{verbatim}
+Q: What is the capital of France?
+A: The capital of France is Paris.
+Expected: Paris
+Result: Correct
+
+Q: Who wrote 'Romeo and Juliet'?
+A: William Shakespeare wrote Romeo and Juliet.
+Expected: Shakespeare
+Result: Correct
+
+Q: What is 15 multiplied by 7?
+A: 15 multiplied by 7 equals 105.
+Expected: 105
+Result: Correct
+...
+\end{verbatim}
+
+\subsection{System Information}
+
+\begin{verbatim}
+CPU: AMD Ryzen 7 PRO 6850H
+  Cores: 8
+  Threads: 16
+  Base Clock: 3.2 GHz
+  Max Boost: 4.7 GHz
+  L3 Cache: 16 MB
+
+Memory:
+  Total: 32 GB DDR5-4800
+  Available: 28 GB (4 GB to VRAM)
+  Speed: 4800 MT/s
+  Channels: 2
+
+OS:
+  Windows 11 Build 22631
+  WSL2 Ubuntu 22.04
+  Kernel: 5.15.146
+
+Python:
+  Version: 3.11.8
+  Implementation: CPython
+\end{verbatim}

@@ -1,0 +1,191 @@
+\section{Experimental Setup}
+\label{sec:experimental}
+
+\subsection{Hardware Platform}
+
+All experiments conducted on the GMKtech M7 platform.
+
+\subsubsection{System Specifications}
+
+\begin{table}[h]
+\centering
+\caption{Experimental Platform Configuration}
+\label{tab:experimental_platform}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+CPU & AMD Ryzen 7 PRO 6850H \\
+Cores/Threads & 8/16 \\
+Base/Boost Clock & 3.2/4.7 GHz \\
+L3 Cache & 16 MB \\
+Memory & 32 GB DDR5-4800 \\
+Available Memory & 28 GB (4 GB to VRAM) \\
+Storage & 1 TB NVMe SSD \\
+OS & Windows 11 + WSL2 Ubuntu 22.04 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Power Profile}
+
+System configured for sustained performance:
+
+\begin{itemize}
+    \item Power plan: High Performance
+    \item CPU governor: Performance
+    \item No thermal throttling during tests
+    \item Background processes minimized
+\end{itemize}
+
+\subsection{Software Environment}
+
+\subsubsection{Python Environment}
+
+\begin{itemize}
+    \item Python 3.11.8
+    \item uv package manager for fast resolution
+    \item Virtual environment isolated
+\end{itemize}
+
+\subsubsection{Key Dependencies}
+
+\begin{table}[h]
+\centering
+\caption{Software Versions}
+\label{tab:software_versions}
+\begin{tabular}{ll}
+\toprule
+\textbf{Package} & \textbf{Version} \\
+\midrule
+llama-cpp-python & 0.3.20 \\
+transformers & 4.40.0 \\
+torch & 2.2.0 \\
+numpy & 1.26.0 \\
+psutil & 5.9.8 \\
+pydantic & 2.7.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Compilation Flags}
+
+llama.cpp compiled with:
+
+\begin{itemize}
+    \item \texttt{GGML\_AVX2}=ON
+    \item \texttt{GGML\_FMA}=ON
+    \item \texttt{GGML\_F16C}=ON
+    \item \texttt{GGML\_OPENMP}=ON
+\end{itemize}
+
+\subsection{Model Configuration}
+
+\subsubsection{MiniMax M2.7}
+
+\begin{itemize}
+    \item Model ID: MiniMaxAI/MiniMax-M2.7
+    \item Parameters: 2.7 billion
+    \item Context: 196,608 tokens (trained)
+    \item Architecture: Dense Transformer
+\end{itemize}
+
+\subsubsection{Quantization Settings}
+
+Primary test configuration:
+
+\begin{itemize}
+    \item Weights: Q4\_K\_M
+    \item KV Cache: turbo3 (3-bit)
+    \item Context: 194,560 tokens
+    \item Threads: 8
+    \item Batch: 2048
+\end{itemize}
+
+\subsection{Measurement Tools}
+
+\subsubsection{Performance Measurement}
+
+\begin{itemize}
+    \item \texttt{time.perf\_counter()} for high-resolution timing
+    \item \texttt{psutil} for memory monitoring
+    \item \texttt{tracemalloc} for Python memory tracking
+\end{itemize}
+
+\subsubsection{System Monitoring}
+
+\begin{itemize}
+    \item \texttt{htop} for CPU utilization
+    \item \texttt{nvtop} for memory monitoring
+    \item Custom profiling scripts
+\end{itemize}
+
+\subsection{Experimental Procedure}
+
+\subsubsection{Pre-experiment Setup}
+
+\begin{enumerate}
+    \item System reboot
+    \item Close unnecessary applications
+    \item Clear disk caches
+    \item Warm up hardware (10 min light load)
+\end{enumerate}
+
+\subsubsection{Test Execution}
+
+\begin{enumerate}
+    \item Load model with target configuration
+    \item Run warmup iterations (discarded)
+    \item Execute benchmark iterations
+    \item Record all measurements
+    \item Cleanup and unload
+\end{enumerate}
+
+\subsubsection{Repetition}
+
+\begin{itemize}
+    \item Each test run 5 times
+    \item Report mean and confidence intervals
+    \item Full benchmark suite run 3 times for verification
+\end{itemize}
+
+\subsection{Control Variables}
+
+\subsubsection{Fixed Parameters}
+
+\begin{itemize}
+    \item Temperature: 1.0 (unless otherwise specified)
+    \item Top-p: 0.95
+    \item Top-k: 40
+    \item Random seed: 42 (where applicable)
+\end{itemize}
+
+\subsubsection{Controlled Factors}
+
+\begin{itemize}
+    \item Network disabled (for local-only tests)
+    \item No other CPU-intensive processes
+    \item Consistent ambient temperature
+    \item AC power (not battery)
+\end{itemize}
+
+\subsection{Baseline Comparisons}
+
+We establish baselines for comparison:
+
+\begin{itemize}
+    \item FP16 Transformers (quality baseline)
+    \item llama.cpp Q8\_0 (balanced baseline)
+    \item Competitive systems (where applicable)
+\end{itemize}
+
+\subsection{Data Collection}
+
+All raw data collected and archived:
+
+\begin{itemize}
+    \item JSON format for machine readability
+    \item CSV summaries for quick inspection
+    \item Plots generated for visualization
+    \item Data repository for reproducibility
+\end{itemize}

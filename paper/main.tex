@@ -1,0 +1,159 @@
+\documentclass[11pt,a4paper]{article}
+
+% Core packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{natbib}
+\usepackage{appendix}
+\usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{pgfplots}
+\usepackage{rotating}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+
+% Page geometry
+\geometry{
+    a4paper,
+    margin=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm,
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdftitle={Miniforge: High-Performance Local LLM Inference for Constrained Hardware},
+    pdfauthor={Miniforge Research Team},
+}
+
+% Code listings style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+}
+
+% Custom colors
+\definecolor{miniforgeblue}{RGB}{45, 85, 130}
+\definecolor{miniforgegreen}{RGB}{70, 140, 100}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Theorem environments
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+
+% Title information
+\title{
+\textbf{Miniforge: High-Performance Local LLM Inference for Constrained Hardware}\\[0.5em]
+\large A Comprehensive Study of Optimized Inference for the MiniMax M2.7 Model on the GMKtech M7 Platform
+}
+
+\author{
+Jackson Wheeler\\
+\texttt{jacksonwheeler@zapdev.link}\\
+Zapdev Labs\\
+\textit{April 2026}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\newpage
+
+% Table of Contents - reduced depth to show only main sections
+{
+\small
+\setcounter{tocdepth}{1}
+\tableofcontents
+}
+\newpage
+
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
+
+% Main sections
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/architecture}
+\input{sections/hardware}
+\input{sections/memory}
+\input{sections/quantization}
+\input{sections/kv_cache}
+\input{sections/backends}
+\input{sections/implementation}
+\input{sections/benchmarks}
+\input{sections/experimental}
+\input{sections/results}
+\input{sections/analysis}
+\input{sections/related_work}
+\input{sections/future_work}
+\input{sections/conclusion}
+
+% Acknowledgments
+\section*{Acknowledgments}
+\addcontentsline{toc}{section}{Acknowledgments}
+We thank the open-source community for their contributions to llama.cpp, transformers, and the broader LLM ecosystem. Special thanks to the MiniMax team for releasing the M2.7 model and supporting open research.
+
+% References
+\newpage
+\bibliographystyle{apalike}
+\bibliography{references/bibliography}
+
+% Appendices
+\newpage
+\appendix
+\input{sections/appendix_a}
+\input{sections/appendix_b}
+\input{sections/appendix_c}
+
+\end{document}

@@ -1,0 +1,336 @@
+\contentsline {section}{\numberline {1}Introduction}{5}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The Challenge of Local LLM Deployment}{5}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The MiniMax M2.7 Opportunity}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}The GMKtech M7 Platform}{6}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Research Questions and Contributions}{6}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Paper Organization}{7}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Target Performance Criteria}{7}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Broader Impact}{7}{subsection.1.7}%
+\contentsline {subsection}{\numberline {1.8}Related Work Context}{8}{subsection.1.8}%
+\contentsline {section}{\numberline {2}Background and Preliminaries}{8}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Transformer Architecture Fundamentals}{8}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Attention Mechanism}{8}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}KV Cache Mechanics}{9}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3}Feed-Forward Network}{9}{subsubsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.2}Quantization Methods}{9}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Uniform Quantization}{9}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}GGUF Format and k-quants}{9}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Quantization-Aware Training vs Post-Training}{10}{subsubsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.3}KV Cache Compression Techniques}{10}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Quantized Cache}{10}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Eviction Policies}{10}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Cross-Layer KV Sharing}{11}{subsubsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.4}CPU Inference Optimization}{11}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}SIMD Utilization}{11}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Memory Bandwidth Bottlenecks}{11}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.3}Quantization for Bandwidth Reduction}{11}{subsubsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.5}LLM Serving Systems}{11}{subsection.2.5}%
+\contentsline {subsubsection}{\numberline {2.5.1}llama.cpp}{12}{subsubsection.2.5.1}%
+\contentsline {subsubsection}{\numberline {2.5.2}vLLM}{12}{subsubsection.2.5.2}%
+\contentsline {subsubsection}{\numberline {2.5.3}TensorRT-LLM}{12}{subsubsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.6}Evaluation Metrics}{12}{subsection.2.6}%
+\contentsline {subsubsection}{\numberline {2.6.1}Performance Metrics}{12}{subsubsection.2.6.1}%
+\contentsline {subsubsection}{\numberline {2.6.2}Memory Metrics}{13}{subsubsection.2.6.2}%
+\contentsline {subsubsection}{\numberline {2.6.3}Quality Metrics}{13}{subsubsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.7}The Efficiency-Quality Trade-off}{13}{subsection.2.7}%
+\contentsline {section}{\numberline {3}System Architecture}{14}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Design Principles}{14}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}High-Level Architecture}{14}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}API Layer}{15}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Inference Engine}{15}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Backend Layer}{15}{subsubsection.3.2.3}%
+\contentsline {subsubsection}{\numberline {3.2.4}Memory Management}{15}{subsubsection.3.2.4}%
+\contentsline {subsubsection}{\numberline {3.2.5}Configuration}{15}{subsubsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.3}Module Interactions}{15}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Component Specifications}{16}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Miniforge Class}{16}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}InferenceEngine}{16}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}MemoryManager}{17}{subsubsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.5}Async Architecture}{17}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Error Handling and Recovery}{18}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.7}Extension Points}{18}{subsection.3.7}%
+\contentsline {subsection}{\numberline {3.8}Thread Safety and Concurrency}{18}{subsection.3.8}%
+\contentsline {section}{\numberline {4}Hardware-Specific Optimizations}{18}{section.4}%
+\contentsline {subsection}{\numberline {4.1}AMD Ryzen 7 PRO 6850H Analysis}{18}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Microarchitecture}{18}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}Memory Subsystem}{19}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Cache Hierarchy Effects}{19}{subsubsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.2}Platform-Specific Configuration}{20}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}WSL2 Considerations}{20}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Memory Management}{20}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}File System Performance}{20}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}AMD-Specific Optimizations}{20}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}ZenDNN Integration}{20}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}AVX2 Kernel Selection}{21}{subsubsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.5}Power and Thermal Management}{21}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Unified Memory Architecture}{21}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Performance Profiling}{21}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}Optimal Thread Configuration}{22}{subsection.4.8}%
+\contentsline {subsection}{\numberline {4.9}Batch Size Tuning}{22}{subsection.4.9}%
+\contentsline {section}{\numberline {5}Memory Management Framework}{22}{section.5}%
+\contentsline {subsection}{\numberline {5.1}The 28GB Constraint}{22}{subsection.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Memory Budget Analysis}{22}{subsubsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.2}Automatic Quantization Selection}{23}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Selection Algorithm}{23}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Preference Ordering}{23}{subsubsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.3}Dynamic Context Window Calculation}{23}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}KV Cache Size Formula}{24}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Context Size Calculation}{24}{subsubsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.4}Safety Margins and Limits}{24}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}Safety Factor}{24}{subsubsection.5.4.1}%
+\contentsline {subsubsection}{\numberline {5.4.2}Hard Limits}{25}{subsubsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.5}Memory Tracking and Statistics}{25}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Optimal Settings Generation}{25}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}Context Fallback Strategy}{26}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Working Memory Reservation}{26}{subsection.5.8}%
+\contentsline {subsection}{\numberline {5.9}Memory Profiling and Diagnostics}{26}{subsection.5.9}%
+\contentsline {subsection}{\numberline {5.10}Memory Efficiency Score}{27}{subsection.5.10}%
+\contentsline {section}{\numberline {6}Quantization Strategies}{27}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Quantization Methodology}{27}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Weight Quantization Impact}{27}{subsubsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.2}GGUF k-quant Analysis}{27}{subsection.6.2}%
+\contentsline {subsubsection}{\numberline {6.2.1}Q4\_K\_M (Primary Recommendation)}{27}{subsubsection.6.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2}Q5\_K\_M (Quality-Critical)}{28}{subsubsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.3}Q6\_K (High Quality)}{28}{subsubsection.6.2.3}%
+\contentsline {subsubsection}{\numberline {6.2.4}Q3\_K\_M (Aggressive Compression)}{28}{subsubsection.6.2.4}%
+\contentsline {subsection}{\numberline {6.3}Quality Evaluation Methodology}{28}{subsection.6.3}%
+\contentsline {subsubsection}{\numberline {6.3.1}Perplexity Comparison}{28}{subsubsection.6.3.1}%
+\contentsline {subsubsection}{\numberline {6.3.2}Task-Based Evaluation}{28}{subsubsection.6.3.2}%
+\contentsline {subsubsection}{\numberline {6.3.3}Human Evaluation Protocol}{29}{subsubsection.6.3.3}%
+\contentsline {subsection}{\numberline {6.4}Quantization Results}{29}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Recommendation Framework}{29}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Mixed Precision Considerations}{29}{subsection.6.6}%
+\contentsline {subsubsection}{\numberline {6.6.1}Layer-wise Precision}{30}{subsubsection.6.6.1}%
+\contentsline {subsection}{\numberline {6.7}Quantization Artifacts}{30}{subsection.6.7}%
+\contentsline {subsubsection}{\numberline {6.7.1}Token Repetition}{30}{subsubsection.6.7.1}%
+\contentsline {subsubsection}{\numberline {6.7.2}Confidence Calibration}{30}{subsubsection.6.7.2}%
+\contentsline {subsection}{\numberline {6.8}Conversion Pipeline}{30}{subsection.6.8}%
+\contentsline {section}{\numberline {7}KV Cache Compression with TurboQuant}{30}{section.7}%
+\contentsline {subsection}{\numberline {7.1}The KV Cache Bottleneck}{30}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}TurboQuant Methodology}{31}{subsection.7.2}%
+\contentsline {subsubsection}{\numberline {7.2.1}Quantization Scheme}{31}{subsubsection.7.2.1}%
+\contentsline {subsubsection}{\numberline {7.2.2}3-bit Implementation (Turbo3)}{31}{subsubsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.3}Accuracy Analysis}{31}{subsection.7.3}%
+\contentsline {subsubsection}{\numberline {7.3.1}Needle-in-Haystack Test}{31}{subsubsection.7.3.1}%
+\contentsline {subsubsection}{\numberline {7.3.2}Depth-Dependent Analysis}{32}{subsubsection.7.3.2}%
+\contentsline {subsection}{\numberline {7.4}Perplexity Impact}{32}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Flash Attention Integration}{32}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Context Length Strategy}{33}{subsection.7.6}%
+\contentsline {subsubsection}{\numberline {7.6.1}Dynamic Context Sizing}{33}{subsubsection.7.6.1}%
+\contentsline {subsection}{\numberline {7.7}Multi-Sequence Memory Sharing}{33}{subsection.7.7}%
+\contentsline {subsection}{\numberline {7.8}Cache Eviction Policies (Future Work)}{33}{subsection.7.8}%
+\contentsline {subsubsection}{\numberline {7.8.1}H2O (Heavy-Hitter Oracle)}{33}{subsubsection.7.8.1}%
+\contentsline {subsubsection}{\numberline {7.8.2}StreamingLLM}{33}{subsubsection.7.8.2}%
+\contentsline {subsection}{\numberline {7.9}Measurement and Monitoring}{34}{subsection.7.9}%
+\contentsline {subsection}{\numberline {7.10}Performance Characteristics}{34}{subsection.7.10}%
+\contentsline {section}{\numberline {8}Inference Backends}{34}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Backend Architecture}{34}{subsection.8.1}%
+\contentsline {subsubsection}{\numberline {8.1.1}Backend Interface}{34}{subsubsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.2}llama.cpp Backend}{34}{subsection.8.2}%
+\contentsline {subsubsection}{\numberline {8.2.1}Key Features}{35}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.2}Configuration Options}{35}{subsubsection.8.2.2}%
+\contentsline {subsubsection}{\numberline {8.2.3}Context Fallback}{35}{subsubsection.8.2.3}%
+\contentsline {subsection}{\numberline {8.3}Transformers Backend}{36}{subsection.8.3}%
+\contentsline {subsubsection}{\numberline {8.3.1}Use Cases}{36}{subsubsection.8.3.1}%
+\contentsline {subsubsection}{\numberline {8.3.2}Configuration}{36}{subsubsection.8.3.2}%
+\contentsline {subsubsection}{\numberline {8.3.3}Performance Comparison}{36}{subsubsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.4}Backend Selection Strategy}{36}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Backend Fallback Mechanism}{37}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}Unified API Benefits}{37}{subsection.8.6}%
+\contentsline {subsection}{\numberline {8.7}Future Backend Extensions}{37}{subsection.8.7}%
+\contentsline {section}{\numberline {9}Implementation Details}{37}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Package Architecture}{37}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Async Implementation Patterns}{38}{subsection.9.2}%
+\contentsline {subsubsection}{\numberline {9.2.1}Thread Pool Delegation}{38}{subsubsection.9.2.1}%
+\contentsline {subsubsection}{\numberline {9.2.2}Streaming Architecture}{38}{subsubsection.9.2.2}%
+\contentsline {subsection}{\numberline {9.3}Configuration System}{38}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Error Handling Strategy}{39}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Memory Monitoring}{39}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}Tool Calling Framework}{39}{subsection.9.6}%
+\contentsline {subsection}{\numberline {9.7}Vision Processing Pipeline}{40}{subsection.9.7}%
+\contentsline {subsection}{\numberline {9.8}Type Safety}{40}{subsection.9.8}%
+\contentsline {subsection}{\numberline {9.9}Testing Strategy}{41}{subsection.9.9}%
+\contentsline {subsection}{\numberline {9.10}Documentation}{41}{subsection.9.10}%
+\contentsline {section}{\numberline {10}Benchmark Methodology}{41}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Benchmark Suite Overview}{41}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Performance Benchmarks}{42}{subsection.10.2}%
+\contentsline {subsubsection}{\numberline {10.2.1}Token Throughput}{42}{subsubsection.10.2.1}%
+\contentsline {subsubsection}{\numberline {10.2.2}Time-to-First-Token (TTFT)}{42}{subsubsection.10.2.2}%
+\contentsline {subsubsection}{\numberline {10.2.3}Inter-Token Latency (ITL)}{42}{subsubsection.10.2.3}%
+\contentsline {subsubsection}{\numberline {10.2.4}Prompt Processing}{42}{subsubsection.10.2.4}%
+\contentsline {subsection}{\numberline {10.3}Memory Benchmarks}{42}{subsection.10.3}%
+\contentsline {subsubsection}{\numberline {10.3.1}Memory Overhead by Context}{42}{subsubsection.10.3.1}%
+\contentsline {subsubsection}{\numberline {10.3.2}Memory Efficiency Score}{43}{subsubsection.10.3.2}%
+\contentsline {subsubsection}{\numberline {10.3.3}Generation Memory Stability}{43}{subsubsection.10.3.3}%
+\contentsline {subsection}{\numberline {10.4}Context Benchmarks}{43}{subsection.10.4}%
+\contentsline {subsubsection}{\numberline {10.4.1}Needle-in-Haystack}{43}{subsubsection.10.4.1}%
+\contentsline {subsubsection}{\numberline {10.4.2}Multi-Needle Retrieval}{43}{subsubsection.10.4.2}%
+\contentsline {subsubsection}{\numberline {10.4.3}Maximum Context Test}{43}{subsubsection.10.4.3}%
+\contentsline {subsection}{\numberline {10.5}Quality Benchmarks}{44}{subsection.10.5}%
+\contentsline {subsubsection}{\numberline {10.5.1}Question Answering}{44}{subsubsection.10.5.1}%
+\contentsline {subsubsection}{\numberline {10.5.2}Mathematical Reasoning}{44}{subsubsection.10.5.2}%
+\contentsline {subsubsection}{\numberline {10.5.3}Summarization}{44}{subsubsection.10.5.3}%
+\contentsline {subsubsection}{\numberline {10.5.4}Instruction Following}{44}{subsubsection.10.5.4}%
+\contentsline {subsubsection}{\numberline {10.5.5}Coherence}{44}{subsubsection.10.5.5}%
+\contentsline {subsection}{\numberline {10.6}Benchmark Infrastructure}{45}{subsection.10.6}%
+\contentsline {subsubsection}{\numberline {10.6.1}Automated Test Runner}{45}{subsubsection.10.6.1}%
+\contentsline {subsubsection}{\numberline {10.6.2}Result Storage}{45}{subsubsection.10.6.2}%
+\contentsline {subsubsection}{\numberline {10.6.3}Visualization}{45}{subsubsection.10.6.3}%
+\contentsline {subsection}{\numberline {10.7}Statistical Methodology}{45}{subsection.10.7}%
+\contentsline {subsubsection}{\numberline {10.7.1}Sample Size}{45}{subsubsection.10.7.1}%
+\contentsline {subsubsection}{\numberline {10.7.2}Outlier Handling}{46}{subsubsection.10.7.2}%
+\contentsline {subsubsection}{\numberline {10.7.3}Reproducibility}{46}{subsubsection.10.7.3}%
+\contentsline {section}{\numberline {11}Experimental Setup}{46}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Hardware Platform}{46}{subsection.11.1}%
+\contentsline {subsubsection}{\numberline {11.1.1}System Specifications}{46}{subsubsection.11.1.1}%
+\contentsline {subsubsection}{\numberline {11.1.2}Power Profile}{46}{subsubsection.11.1.2}%
+\contentsline {subsection}{\numberline {11.2}Software Environment}{46}{subsection.11.2}%
+\contentsline {subsubsection}{\numberline {11.2.1}Python Environment}{46}{subsubsection.11.2.1}%
+\contentsline {subsubsection}{\numberline {11.2.2}Key Dependencies}{47}{subsubsection.11.2.2}%
+\contentsline {subsubsection}{\numberline {11.2.3}Compilation Flags}{47}{subsubsection.11.2.3}%
+\contentsline {subsection}{\numberline {11.3}Model Configuration}{47}{subsection.11.3}%
+\contentsline {subsubsection}{\numberline {11.3.1}MiniMax M2.7}{47}{subsubsection.11.3.1}%
+\contentsline {subsubsection}{\numberline {11.3.2}Quantization Settings}{47}{subsubsection.11.3.2}%
+\contentsline {subsection}{\numberline {11.4}Measurement Tools}{47}{subsection.11.4}%
+\contentsline {subsubsection}{\numberline {11.4.1}Performance Measurement}{47}{subsubsection.11.4.1}%
+\contentsline {subsubsection}{\numberline {11.4.2}System Monitoring}{48}{subsubsection.11.4.2}%
+\contentsline {subsection}{\numberline {11.5}Experimental Procedure}{48}{subsection.11.5}%
+\contentsline {subsubsection}{\numberline {11.5.1}Pre-experiment Setup}{48}{subsubsection.11.5.1}%
+\contentsline {subsubsection}{\numberline {11.5.2}Test Execution}{48}{subsubsection.11.5.2}%
+\contentsline {subsubsection}{\numberline {11.5.3}Repetition}{48}{subsubsection.11.5.3}%
+\contentsline {subsection}{\numberline {11.6}Control Variables}{48}{subsection.11.6}%
+\contentsline {subsubsection}{\numberline {11.6.1}Fixed Parameters}{48}{subsubsection.11.6.1}%
+\contentsline {subsubsection}{\numberline {11.6.2}Controlled Factors}{48}{subsubsection.11.6.2}%
+\contentsline {subsection}{\numberline {11.7}Baseline Comparisons}{49}{subsection.11.7}%
+\contentsline {subsection}{\numberline {11.8}Data Collection}{49}{subsection.11.8}%
+\contentsline {section}{\numberline {12}Results}{49}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Performance Results}{49}{subsection.12.1}%
+\contentsline {subsubsection}{\numberline {12.1.1}Token Generation Throughput}{49}{subsubsection.12.1.1}%
+\contentsline {subsubsection}{\numberline {12.1.2}Latency Metrics}{50}{subsubsection.12.1.2}%
+\contentsline {subsubsection}{\numberline {12.1.3}Prompt Processing}{50}{subsubsection.12.1.3}%
+\contentsline {subsection}{\numberline {12.2}Memory Results}{50}{subsection.12.2}%
+\contentsline {subsubsection}{\numberline {12.2.1}Memory Consumption}{50}{subsubsection.12.2.1}%
+\contentsline {subsubsection}{\numberline {12.2.2}Memory Scaling}{51}{subsubsection.12.2.2}%
+\contentsline {subsubsection}{\numberline {12.2.3}Memory Efficiency Score}{52}{subsubsection.12.2.3}%
+\contentsline {subsection}{\numberline {12.3}Context Window Results}{52}{subsection.12.3}%
+\contentsline {subsubsection}{\numberline {12.3.1}Needle-in-Haystack}{52}{subsubsection.12.3.1}%
+\contentsline {subsubsection}{\numberline {12.3.2}Maximum Context}{52}{subsubsection.12.3.2}%
+\contentsline {subsection}{\numberline {12.4}Quality Results}{52}{subsection.12.4}%
+\contentsline {subsubsection}{\numberline {12.4.1}Overall Quality Score}{52}{subsubsection.12.4.1}%
+\contentsline {subsubsection}{\numberline {12.4.2}Task Performance}{52}{subsubsection.12.4.2}%
+\contentsline {subsection}{\numberline {12.5}Quantization Comparison}{52}{subsection.12.5}%
+\contentsline {subsection}{\numberline {12.6}Backend Comparison}{53}{subsection.12.6}%
+\contentsline {subsection}{\numberline {12.7}Summary of Target Achievement}{53}{subsection.12.7}%
+\contentsline {section}{\numberline {13}Analysis}{53}{section.13}%
+\contentsline {subsection}{\numberline {13.1}Performance Analysis}{53}{subsection.13.1}%
+\contentsline {subsubsection}{\numberline {13.1.1}Throughput Characterization}{53}{subsubsection.13.1.1}%
+\contentsline {subsubsection}{\numberline {13.1.2}Scaling Behavior}{54}{subsubsection.13.1.2}%
+\contentsline {subsection}{\numberline {13.2}Memory Analysis}{54}{subsection.13.2}%
+\contentsline {subsubsection}{\numberline {13.2.1}Budget Utilization}{54}{subsubsection.13.2.1}%
+\contentsline {subsubsection}{\numberline {13.2.2}Linear Scaling Verification}{54}{subsubsection.13.2.2}%
+\contentsline {subsection}{\numberline {13.3}Quality Analysis}{55}{subsection.13.3}%
+\contentsline {subsubsection}{\numberline {13.3.1}Quantization Impact}{55}{subsubsection.13.3.1}%
+\contentsline {subsubsection}{\numberline {13.3.2}KV Cache Compression Impact}{55}{subsubsection.13.3.2}%
+\contentsline {subsubsection}{\numberline {13.3.3}Efficiency-Quality Trade-off}{55}{subsubsection.13.3.3}%
+\contentsline {subsection}{\numberline {13.4}Hardware Utilization}{56}{subsection.13.4}%
+\contentsline {subsubsection}{\numberline {13.4.1}CPU Utilization}{56}{subsubsection.13.4.1}%
+\contentsline {subsubsection}{\numberline {13.4.2}Cache Efficiency}{56}{subsubsection.13.4.2}%
+\contentsline {subsection}{\numberline {13.5}Comparison with Literature}{56}{subsection.13.5}%
+\contentsline {subsubsection}{\numberline {13.5.1}llama.cpp Baseline}{56}{subsubsection.13.5.1}%
+\contentsline {subsubsection}{\numberline {13.5.2}Other 2.7B Models}{57}{subsubsection.13.5.2}%
+\contentsline {subsection}{\numberline {13.6}Limitations}{57}{subsection.13.6}%
+\contentsline {subsubsection}{\numberline {13.6.1}Hardware Specificity}{57}{subsubsection.13.6.1}%
+\contentsline {subsubsection}{\numberline {13.6.2}Model Specificity}{57}{subsubsection.13.6.2}%
+\contentsline {subsubsection}{\numberline {13.6.3}Context Window Assumptions}{57}{subsubsection.13.6.3}%
+\contentsline {subsection}{\numberline {13.7}Statistical Significance}{58}{subsection.13.7}%
+\contentsline {subsection}{\numberline {13.8}Reproducibility Assessment}{58}{subsection.13.8}%
+\contentsline {subsection}{\numberline {13.9}Practical Implications}{58}{subsection.13.9}%
+\contentsline {subsubsection}{\numberline {13.9.1}Deployment Viability}{58}{subsubsection.13.9.1}%
+\contentsline {subsubsection}{\numberline {13.9.2}Cost Considerations}{58}{subsubsection.13.9.2}%
+\contentsline {subsection}{\numberline {13.10}Future Optimization Opportunities}{58}{subsection.13.10}%
+\contentsline {section}{\numberline {14}Related Work}{58}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Efficient LLM Inference}{58}{subsection.14.1}%
+\contentsline {subsubsection}{\numberline {14.1.1}Quantization Research}{59}{subsubsection.14.1.1}%
+\contentsline {subsubsection}{\numberline {14.1.2}KV Cache Optimization}{59}{subsubsection.14.1.2}%
+\contentsline {subsubsection}{\numberline {14.1.3}CPU Inference Optimization}{59}{subsubsection.14.1.3}%
+\contentsline {subsection}{\numberline {14.2}Local LLM Deployment}{59}{subsection.14.2}%
+\contentsline {subsubsection}{\numberline {14.2.1}Consumer Hardware Research}{59}{subsubsection.14.2.1}%
+\contentsline {subsubsection}{\numberline {14.2.2}Mobile and Edge Deployment}{60}{subsubsection.14.2.2}%
+\contentsline {subsection}{\numberline {14.3}MiniMax Model Family}{60}{subsection.14.3}%
+\contentsline {subsection}{\numberline {14.4}Memory Management for LLMs}{60}{subsection.14.4}%
+\contentsline {subsubsection}{\numberline {14.4.1}Dynamic Memory Approaches}{60}{subsubsection.14.4.1}%
+\contentsline {subsection}{\numberline {14.5}Comparison with Concurrent Work}{60}{subsection.14.5}%
+\contentsline {subsection}{\numberline {14.6}Research Gaps Addressed}{61}{subsection.14.6}%
+\contentsline {subsection}{\numberline {14.7}Broader Context}{61}{subsection.14.7}%
+\contentsline {subsubsection}{\numberline {14.7.1}Democratization of AI}{61}{subsubsection.14.7.1}%
+\contentsline {subsubsection}{\numberline {14.7.2}Environmental Considerations}{61}{subsubsection.14.7.2}%
+\contentsline {subsection}{\numberline {14.8}Safety and Ethics}{62}{subsection.14.8}%
+\contentsline {subsubsection}{\numberline {14.8.1}Dual-Use Concerns}{62}{subsubsection.14.8.1}%
+\contentsline {subsubsection}{\numberline {14.8.2}Bias and Fairness}{62}{subsubsection.14.8.2}%
+\contentsline {section}{\numberline {15}Future Work}{62}{section.15}%
+\contentsline {subsection}{\numberline {15.1}Immediate Improvements}{62}{subsection.15.1}%
+\contentsline {subsubsection}{\numberline {15.1.1}Speculative Decoding}{62}{subsubsection.15.1.1}%
+\contentsline {subsubsection}{\numberline {15.1.2}Better KV Cache Management}{62}{subsubsection.15.1.2}%
+\contentsline {subsubsection}{\numberline {15.1.3}Multi-Query Attention}{62}{subsubsection.15.1.3}%
+\contentsline {subsection}{\numberline {15.2}Architecture Extensions}{63}{subsection.15.2}%
+\contentsline {subsubsection}{\numberline {15.2.1}Additional Backends}{63}{subsubsection.15.2.1}%
+\contentsline {subsubsection}{\numberline {15.2.2}Vision Model Integration}{63}{subsubsection.15.2.2}%
+\contentsline {subsubsection}{\numberline {15.2.3}Tool Ecosystem}{63}{subsubsection.15.2.3}%
+\contentsline {subsection}{\numberline {15.3}Research Directions}{63}{subsection.15.3}%
+\contentsline {subsubsection}{\numberline {15.3.1}Quantization Research}{63}{subsubsection.15.3.1}%
+\contentsline {subsubsection}{\numberline {15.3.2}Memory Optimization}{63}{subsubsection.15.3.2}%
+\contentsline {subsubsection}{\numberline {15.3.3}Hardware Exploration}{64}{subsubsection.15.3.3}%
+\contentsline {subsection}{\numberline {15.4}Quality Improvements}{64}{subsection.15.4}%
+\contentsline {subsubsection}{\numberline {15.4.1}Fine-Tuning for Quantization}{64}{subsubsection.15.4.1}%
+\contentsline {subsubsection}{\numberline {15.4.2}Retrieval-Augmented Generation}{64}{subsubsection.15.4.2}%
+\contentsline {subsection}{\numberline {15.5}User Experience}{64}{subsection.15.5}%
+\contentsline {subsubsection}{\numberline {15.5.1}Deployment Tools}{64}{subsubsection.15.5.1}%
+\contentsline {subsubsection}{\numberline {15.5.2}API Compatibility}{64}{subsubsection.15.5.2}%
+\contentsline {subsection}{\numberline {15.6}Evaluation Expansion}{65}{subsection.15.6}%
+\contentsline {subsubsection}{\numberline {15.6.1}Long-Context Benchmarks}{65}{subsubsection.15.6.1}%
+\contentsline {subsubsection}{\numberline {15.6.2}Real-World Evaluation}{65}{subsubsection.15.6.2}%
+\contentsline {subsection}{\numberline {15.7}Community and Ecosystem}{65}{subsection.15.7}%
+\contentsline {subsubsection}{\numberline {15.7.1}Documentation}{65}{subsubsection.15.7.1}%
+\contentsline {subsubsection}{\numberline {15.7.2}Contributions}{65}{subsubsection.15.7.2}%
+\contentsline {subsection}{\numberline {15.8}Long-Term Vision}{65}{subsection.15.8}%
+\contentsline {section}{\numberline {16}Conclusion}{66}{section.16}%
+\contentsline {subsection}{\numberline {16.1}Summary}{66}{subsection.16.1}%
+\contentsline {subsection}{\numberline {16.2}Key Contributions}{66}{subsection.16.2}%
+\contentsline {subsection}{\numberline {16.3}Implications}{66}{subsection.16.3}%
+\contentsline {subsubsection}{\numberline {16.3.1}For Researchers}{66}{subsubsection.16.3.1}%
+\contentsline {subsubsection}{\numberline {16.3.2}For Practitioners}{67}{subsubsection.16.3.2}%
+\contentsline {subsubsection}{\numberline {16.3.3}For the Field}{67}{subsubsection.16.3.3}%
+\contentsline {subsection}{\numberline {16.4}Limitations and Caveats}{67}{subsection.16.4}%
+\contentsline {subsection}{\numberline {16.5}Call to Action}{67}{subsection.16.5}%
+\contentsline {subsection}{\numberline {16.6}Final Thoughts}{68}{subsection.16.6}%
+\contentsline {section}{Acknowledgments}{68}{section*.53}%
+\contentsline {section}{\numberline {A}Appendix A: Detailed Benchmark Results}{70}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Raw Performance Data}{70}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}Memory Profiling Traces}{70}{subsection.A.2}%
+\contentsline {subsection}{\numberline {A.3}Context Retrieval Detailed Results}{70}{subsection.A.3}%
+\contentsline {subsection}{\numberline {A.4}Quality Benchmark Raw Data}{70}{subsection.A.4}%
+\contentsline {subsection}{\numberline {A.5}System Information}{71}{subsection.A.5}%
+\contentsline {section}{\numberline {B}Appendix B: Configuration Reference}{71}{appendix.B}%
+\contentsline {subsection}{\numberline {B.1}M7Config Full Reference}{71}{subsection.B.1}%
+\contentsline {subsection}{\numberline {B.2}Configuration File Format}{71}{subsection.B.2}%
+\contentsline {subsection}{\numberline {B.3}Backend Configuration}{72}{subsection.B.3}%
+\contentsline {subsubsection}{\numberline {B.3.1}llama.cpp Backend}{72}{subsubsection.B.3.1}%
+\contentsline {subsubsection}{\numberline {B.3.2}Transformers Backend}{73}{subsubsection.B.3.2}%
+\contentsline {subsection}{\numberline {B.4}Quantization Selection Guide}{73}{subsection.B.4}%
+\contentsline {subsection}{\numberline {B.5}Context Window Sizing}{73}{subsection.B.5}%
+\contentsline {subsection}{\numberline {B.6}Performance Tuning}{73}{subsection.B.6}%
+\contentsline {subsubsection}{\numberline {B.6.1}Thread Count}{73}{subsubsection.B.6.1}%
+\contentsline {subsubsection}{\numberline {B.6.2}Batch Size}{74}{subsubsection.B.6.2}%
+\contentsline {subsection}{\numberline {B.7}Environment Variables}{74}{subsection.B.7}%
+\contentsline {section}{\numberline {C}Appendix C: Code Repository}{74}{appendix.C}%
+\contentsline {subsection}{\numberline {C.1}Repository Structure}{74}{subsection.C.1}%
+\contentsline {subsection}{\numberline {C.2}Package Organization}{74}{subsection.C.2}%
+\contentsline {subsection}{\numberline {C.3}Installation}{74}{subsection.C.3}%
+\contentsline {subsubsection}{\numberline {C.3.1}Quick Install}{74}{subsubsection.C.3.1}%
+\contentsline {subsubsection}{\numberline {C.3.2}Development Install}{75}{subsubsection.C.3.2}%
+\contentsline {subsection}{\numberline {C.4}Quick Start Usage}{75}{subsection.C.4}%
+\contentsline {subsection}{\numberline {C.5}Running Benchmarks}{76}{subsection.C.5}%
+\contentsline {subsection}{\numberline {C.6}License}{76}{subsection.C.6}%
+\contentsline {subsection}{\numberline {C.7}Contributing}{76}{subsection.C.7}%
+\contentsline {subsection}{\numberline {C.8}Acknowledgments}{76}{subsection.C.8}%
+\contentsline {subsection}{\numberline {C.9}Contact}{77}{subsection.C.9}%

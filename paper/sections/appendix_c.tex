@@ -1,0 +1,165 @@
+\section{Appendix C: Code Repository}
+\label{appendix:code}
+
+\subsection{Repository Structure}
+
+Miniforge is available at \url{https://github.com/Zapdev-labs/miniforge}.
+
+\begin{table}[h]
+\centering
+\caption{Repository Directory Structure}
+\label{tab:repo_structure}
+\begin{tabular}{ll}
+\toprule
+\textbf{Directory} & \textbf{Contents} \\
+\midrule
+\texttt{src/miniforge/} & Main package source code \\
+\texttt{benchmarks/} & Benchmark suite and tools \\
+\texttt{tests/} & Unit and integration tests \\
+\texttt{examples/} & Usage examples and tutorials \\
+\texttt{paper/} & Research paper and documentation \\
+\texttt{configs/} & Sample configuration files \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Package Organization}
+
+\begin{table}[h]
+\centering
+\caption{Package Module Structure}
+\label{tab:package_modules}
+\begin{tabular}{ll}
+\toprule
+\textbf{Module} & \textbf{Responsibilities} \\
+\midrule
+\texttt{core/} & InferenceEngine, MemoryManager, backend abstractions \\
+\texttt{models/} & Model loading, registry, conversion utilities \\
+\texttt{generation/} & Text generation, streaming, tool calling \\
+\texttt{multimodal/} & Vision processing, image encoding \\
+\texttt{utils/} & Configuration, logging, system utilities \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Installation}
+
+\subsubsection{Quick Install}
+
+Standard installation from PyPI:
+\begin{itemize}
+    \item Run \texttt{pip install miniforge}
+    \item Requires Python 3.10+
+    \item Optional dependencies: \texttt{[llama-cpp]}, \texttt{[transformers]}, \texttt{[all]}
+\end{itemize}
+
+\subsubsection{Development Install}
+
+For contributors and developers:
+\begin{enumerate}
+    \item Clone repository: \texttt{git clone https://github.com/Zapdev-labs/miniforge.git}
+    \item Navigate to directory: \texttt{cd miniforge}
+    \item Install with dev dependencies: \texttt{uv pip install -e ".[all]"}
+    \item Run tests: \texttt{pytest tests/}
+\end{enumerate}
+
+\subsection{Quick Start Usage}
+
+\textbf{Basic Workflow:}
+\begin{enumerate}
+    \item \textbf{Import:} Load \texttt{Miniforge} class from package
+    \item \textbf{Initialize:} Load model with \texttt{from\_pretrained()}
+    \item \textbf{Configure:} Set quantization, context, and backend
+    \item \textbf{Generate:} Use \texttt{chat()} or \texttt{generate()} methods
+    \item \textbf{Stream:} Enable streaming for real-time output
+    \item \textbf{Cleanup:} Release resources with \texttt{cleanup()}
+\end{enumerate}
+
+\textbf{Key Features Demonstrated:}
+\begin{itemize}
+    \item Simple chat interface with system prompts
+    \item Streaming token generation
+    \item Automatic resource management
+    \item Async/await pattern throughout
+\end{itemize}
+
+\subsection{Running Benchmarks}
+
+Benchmark execution commands:
+
+\begin{table}[h]
+\centering
+\caption{Benchmark Commands}
+\label{tab:benchmark_commands}
+\begin{tabular}{ll}
+\toprule
+\textbf{Command} & \textbf{Action} \\
+\midrule
+\texttt{python -m benchmarks.runner} & Run all benchmarks \\
+\texttt{--benchmarks perf mem} & Run specific suites \\
+\texttt{--html-only --report *.json} & Generate HTML report \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{License}
+
+Miniforge is released under the MIT License:
+
+\textbf{Permissions:}
+\begin{itemize}
+    \item Commercial use
+    \item Modification
+    \item Distribution
+    \item Private use
+    \item Sublicensing
+\end{itemize}
+
+\textbf{Conditions:}
+\begin{itemize}
+    \item Include copyright notice
+    \item Include license text
+\end{itemize}
+
+Copyright (c) 2026 Zapdev Labs
+
+\subsection{Contributing}
+
+Contributions are welcome! Areas of particular interest:
+
+\begin{itemize}
+    \item Additional benchmark tasks
+    \item Hardware-specific optimizations
+    \item Bug fixes and performance improvements
+    \item Documentation improvements
+    \item New backend integrations
+\end{itemize}
+
+\subsection{Acknowledgments}
+
+Miniforge builds upon several open-source projects:
+
+\begin{table}[h]
+\centering
+\caption{Key Dependencies and Acknowledgments}
+\label{tab:dependencies}
+\begin{tabular}{lll}
+\toprule
+\textbf{Project} & \textbf{Author} & \textbf{Purpose} \\
+\midrule
+llama.cpp & Georgi Gerganov & CPU inference engine \\
+Transformers & HuggingFace & Model support \\
+llama-cpp-python & Andrei Betlen & Python bindings \\
+MiniMax M2.7 & MiniMax AI & Target model \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Contact}
+
+For questions or issues:
+
+\begin{itemize}
+    \item GitHub Issues: \url{https://github.com/Zapdev-labs/miniforge/issues}
+    \item Email: jacksonwheeler@zapdev.link
+\end{itemize}

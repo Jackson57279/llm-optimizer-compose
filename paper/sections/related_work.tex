@@ -1,0 +1,176 @@
+\section{Related Work}
+\label{sec:related_work}
+
+\subsection{Efficient LLM Inference}
+
+Research on efficient LLM inference spans multiple approaches.
+
+\subsubsection{Quantization Research}
+
+Post-training quantization has been extensively studied:
+
+\begin{itemize}
+    \item \textbf{LLM.int8()}: Dettmers et al. demonstrated 8-bit quantization without degradation for models up to 175B parameters \cite{dettmers2022llm}
+    \item \textbf{GPTQ}: Frantar et al. introduced one-shot quantization to 3-4 bits with minimal loss \cite{frantar2022gptq}
+    \item \textbf{AWQ}: Lin et al. proposed activation-aware weight quantization for better hardware efficiency \cite{lin2023awq}
+\end{itemize}
+
+Miniforge builds on these foundations, applying them specifically to the sub-7B regime where quantization resilience is typically higher.
+
+\subsubsection{KV Cache Optimization}
+
+Recent work addresses KV cache memory consumption:
+
+\begin{itemize}
+    \item \textbf{H2O}: Zhang et al. proposed heavy-hitter eviction maintaining 50\% cache with minimal accuracy impact \cite{zhang2023h2o}
+    \item \textbf{StreamingLLM}: Xiao et al. demonstrated infinite context with attention sinks \cite{xiao2023streamingllm}
+    \item \textbf{Scissorhands}: Liu et al. introduced accumulated attention-based eviction \cite{liu2023scissorhands}
+    \item \textbf{Cache Compression}: Several works explore 4-bit and 2-bit KV cache quantization
+\end{itemize}
+
+TurboQuant in Miniforge represents a practical implementation of KV cache quantization, validated on real hardware.
+
+\subsubsection{CPU Inference Optimization}
+
+\begin{itemize}
+    \item \textbf{llama.cpp}: Gerganov's foundational work on CPU-optimized inference \cite{ggerganov2023llama}
+    \item \textbf{Intel Extension for Transformers}: Optimized kernels for Intel CPUs
+    \item \textbf{ONNX Runtime}: Cross-platform optimization with CPU providers
+\end{itemize}
+
+Miniforge leverages llama.cpp while adding hardware-specific optimizations for the AMD Zen 3+ architecture.
+
+\subsection{Local LLM Deployment}
+
+\subsubsection{Consumer Hardware Research}
+
+Several projects target consumer hardware:
+
+\begin{itemize}
+    \item \textbf{Ollama}: macOS-focused local LLM deployment
+    \item \textbf{LocalAI}: Multi-backend local inference server
+    \item \textbf{llamafile}: Single-file executable LLMs
+\end{itemize}
+
+Miniforge distinguishes itself through hardware-aware optimization specifically for 28GB-class systems.
+
+\subsubsection{Mobile and Edge Deployment}
+
+Research on extreme resource constraints:
+
+\begin{itemize}
+    \item \textbf{MLC LLM}: Universal deployment including mobile
+    \item \textbf{PowerInfer}: SSD-offload for memory-constrained systems
+    \item \textbf{Edge AI}: Frameworks for microcontroller deployment
+\end{itemize}
+
+While not targeting mobile, Miniforge shares principles of aggressive optimization for resource constraints.
+
+\subsection{MiniMax Model Family}
+
+MiniMax has released several models:
+
+\begin{itemize}
+    \item MiniMax-M1: Initial release with strong Chinese capabilities
+    \item MiniMax-M2: Expanded to 196K context
+    \item MiniMax-M2.7: Focused English optimization at 2.7B parameters
+\end{itemize}
+
+Academic literature on MiniMax specifically is limited; this paper contributes the first comprehensive analysis of its deployment characteristics.
+
+\subsection{Memory Management for LLMs}
+
+\subsubsection{Dynamic Memory Approaches}
+
+\begin{itemize}
+    \item \textbf{vLLM PagedAttention}: GPU memory management inspired by OS virtual memory
+    \item \textbf{Speculative Memory}: Predictive allocation based on access patterns
+    \item \textbf{Compression-Aware Scheduling}: Coordinated memory and compute
+\end{itemize}
+
+Miniforge's MemoryManager draws inspiration from these approaches, adapted for CPU-based unified memory systems.
+
+\subsection{Comparison with Concurrent Work}
+
+Table \ref{tab:related_comparison} compares Miniforge with related systems across key deployment characteristics. Each system occupies a distinct position in the design space, reflecting different optimization targets and use cases.
+
+\begin{table}[h]
+\centering
+\caption{Comparison with Related Systems}
+\label{tab:related_comparison}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{Hardware} & \textbf{Context} & \textbf{Speed} & \textbf{Focus} \\
+\midrule
+llama.cpp & CPU/GPU & Flexible & Variable & General \\
+vLLM & GPU & Long & Fast & Serving \\
+Ollama & macOS & Medium & Medium & Desktop \\
+Miniforge & CPU (28GB) & 192K & 20 tok/s & Constrained \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{llama.cpp} serves as Miniforge's primary backend and provides general-purpose CPU/GPU inference. While highly capable, llama.cpp does not implement hardware-specific optimizations for 28GB-class systems or automatic memory management tailored to constrained deployments. Miniforge adds these capabilities while maintaining compatibility with llama.cpp's extensive quantization support.
+
+\textbf{vLLM} focuses on GPU-based serving with sophisticated memory management through PagedAttention. Its optimizations target datacenter deployment with abundant VRAM, making it unsuitable for our target platform. However, vLLM's memory management concepts influenced our MemoryManager design.
+
+\textbf{Ollama} provides convenient local LLM deployment primarily for macOS systems. Its focus on ease of use for desktop users complements Miniforge's focus on constrained hardware optimization. The two projects address different segments of the local deployment market.
+
+Miniforge's distinctive contribution is demonstrating that careful hardware-specific optimization enables capable LLM deployment on resource-constrained platforms previously considered inadequate for practical use.
+
+\subsection{Research Gaps Addressed}
+
+Miniforge addresses several gaps in existing research:
+
+\begin{enumerate}
+    \item \textbf{Sub-7B CPU optimization:} Most research focuses on larger models or GPU deployment
+    \item \textbf{Unified memory systems:} 28GB-class systems represent an underexplored deployment target
+    \item \textbf{Comprehensive benchmarking:} Need for systematic evaluation across performance, memory, context, and quality
+    \item \textbf{Production-ready tooling:} Gap between research prototypes and deployable systems
+\end{enumerate}
+
+\subsection{Broader Context}
+
+\subsubsection{Democratization of AI}
+
+Local LLM deployment contributes to AI democratization:
+
+\begin{itemize}
+    \item Reduced barrier to entry for AI experimentation
+    \item Privacy-preserving alternatives to cloud APIs
+    \item Offline capability for underserved regions
+\end{itemize}
+
+\subsubsection{Environmental Considerations}
+
+Efficient local inference may reduce environmental impact:
+
+\begin{itemize}
+    \item Avoids data center energy for high-volume inference
+    \item Optimized models reduce compute per token
+    \item Consumer hardware amortization over years of use
+\end{itemize}
+
+However, manufacturing impact and e-waste considerations require careful life-cycle analysis.
+
+\subsection{Safety and Ethics}
+
+\subsubsection{Dual-Use Concerns}
+
+Easier local deployment raises dual-use considerations:
+
+\begin{itemize}
+    \item Misuse potential increases with accessibility
+    \item However, 2.7B models have limited capability for serious harm
+    \item Open research generally beneficial for defense development
+\end{itemize}
+
+\subsubsection{Bias and Fairness}
+
+Local deployment does not eliminate model bias:
+
+\begin{itemize}
+    \item MiniMax training data may contain societal biases
+    \item Users should validate for their specific applications
+    \item Open weights enable auditing and red-teaming
+\end{itemize}

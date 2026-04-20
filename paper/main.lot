@@ -1,0 +1,51 @@
+\contentsline {table}{\numberline {1}{\ignorespaces GMKtech M7 Platform Specifications}}{6}{table.caption.4}%
+\contentsline {table}{\numberline {2}{\ignorespaces Target Performance Criteria}}{7}{table.caption.5}%
+\contentsline {table}{\numberline {3}{\ignorespaces GGUF Quantization Schemes}}{10}{table.caption.6}%
+\contentsline {table}{\numberline {4}{\ignorespaces Miniforge Public API Methods}}{16}{table.caption.9}%
+\contentsline {table}{\numberline {5}{\ignorespaces InferenceEngine Component Methods}}{16}{table.caption.10}%
+\contentsline {table}{\numberline {6}{\ignorespaces MemoryManager Constants and Methods}}{17}{table.caption.11}%
+\contentsline {table}{\numberline {7}{\ignorespaces Ryzen 7 PRO 6850H Key Specifications}}{19}{table.caption.12}%
+\contentsline {table}{\numberline {8}{\ignorespaces M7Config Hardware-Specific Settings}}{20}{table.caption.13}%
+\contentsline {table}{\numberline {9}{\ignorespaces Thread Count Performance Comparison}}{22}{table.caption.14}%
+\contentsline {table}{\numberline {10}{\ignorespaces Memory Budget Allocation}}{22}{table.caption.15}%
+\contentsline {table}{\numberline {11}{\ignorespaces KV Cache Bytes per Element by Quantization}}{24}{table.caption.16}%
+\contentsline {table}{\numberline {12}{\ignorespaces Memory Statistics Fields}}{25}{table.caption.17}%
+\contentsline {table}{\numberline {13}{\ignorespaces Batch Size Selection Criteria}}{26}{table.caption.18}%
+\contentsline {table}{\numberline {14}{\ignorespaces Component Sensitivity to Quantization}}{27}{table.caption.19}%
+\contentsline {table}{\numberline {15}{\ignorespaces Quantization Quality Results}}{29}{table.caption.20}%
+\contentsline {table}{\numberline {16}{\ignorespaces KV Cache Memory Requirements (192K context)}}{31}{table.caption.21}%
+\contentsline {table}{\numberline {17}{\ignorespaces TurboQuant Retrieval Accuracy}}{31}{table.caption.22}%
+\contentsline {table}{\numberline {18}{\ignorespaces Perplexity by KV Cache Quantization}}{32}{table.caption.23}%
+\contentsline {table}{\numberline {19}{\ignorespaces Backend Interface Methods}}{35}{table.caption.24}%
+\contentsline {table}{\numberline {20}{\ignorespaces llama.cpp Configuration Parameters}}{35}{table.caption.25}%
+\contentsline {table}{\numberline {21}{\ignorespaces Transformers Backend Configuration}}{36}{table.caption.26}%
+\contentsline {table}{\numberline {22}{\ignorespaces Backend Performance Comparison}}{36}{table.caption.27}%
+\contentsline {table}{\numberline {23}{\ignorespaces Miniforge Package Structure}}{38}{table.caption.28}%
+\contentsline {table}{\numberline {24}{\ignorespaces M7Config Key Parameters}}{39}{table.caption.29}%
+\contentsline {table}{\numberline {25}{\ignorespaces Memory Statistics Collection}}{39}{table.caption.30}%
+\contentsline {table}{\numberline {26}{\ignorespaces Test Coverage by Category}}{41}{table.caption.32}%
+\contentsline {table}{\numberline {27}{\ignorespaces Experimental Platform Configuration}}{46}{table.caption.33}%
+\contentsline {table}{\numberline {28}{\ignorespaces Software Versions}}{47}{table.caption.34}%
+\contentsline {table}{\numberline {29}{\ignorespaces Generation Throughput Results}}{49}{table.caption.35}%
+\contentsline {table}{\numberline {30}{\ignorespaces Latency Results}}{50}{table.caption.37}%
+\contentsline {table}{\numberline {31}{\ignorespaces Prompt Processing Speed}}{50}{table.caption.38}%
+\contentsline {table}{\numberline {32}{\ignorespaces Memory Usage by Component}}{51}{table.caption.40}%
+\contentsline {table}{\numberline {33}{\ignorespaces Retrieval Accuracy by Context Length}}{52}{table.caption.42}%
+\contentsline {table}{\numberline {34}{\ignorespaces Quality Metrics}}{53}{table.caption.44}%
+\contentsline {table}{\numberline {35}{\ignorespaces Quantization Level Comparison}}{54}{table.caption.46}%
+\contentsline {table}{\numberline {36}{\ignorespaces Backend Performance}}{55}{table.caption.48}%
+\contentsline {table}{\numberline {37}{\ignorespaces Target Criteria Achievement}}{56}{table.caption.50}%
+\contentsline {table}{\numberline {38}{\ignorespaces Comparison with Related Systems}}{60}{table.caption.52}%
+\contentsline {table}{\numberline {39}{\ignorespaces Complete Throughput Benchmark Results}}{70}{table.39}%
+\contentsline {table}{\numberline {40}{\ignorespaces Needle-in-Haystack Detailed Results}}{70}{table.40}%
+\contentsline {table}{\numberline {41}{\ignorespaces M7Config Hardware Settings}}{72}{table.caption.55}%
+\contentsline {table}{\numberline {42}{\ignorespaces M7Config Model Settings}}{72}{table.caption.56}%
+\contentsline {table}{\numberline {43}{\ignorespaces M7Config Performance Settings}}{73}{table.caption.57}%
+\contentsline {table}{\numberline {44}{\ignorespaces M7Config Generation Defaults}}{73}{table.caption.58}%
+\contentsline {table}{\numberline {45}{\ignorespaces M7Config Feature Flags}}{74}{table.caption.59}%
+\contentsline {table}{\numberline {46}{\ignorespaces Quantization Selection by Available Memory}}{74}{table.caption.60}%
+\contentsline {table}{\numberline {47}{\ignorespaces Environment Variables}}{74}{table.caption.61}%
+\contentsline {table}{\numberline {48}{\ignorespaces Repository Directory Structure}}{75}{table.caption.62}%
+\contentsline {table}{\numberline {49}{\ignorespaces Package Module Structure}}{75}{table.caption.63}%
+\contentsline {table}{\numberline {50}{\ignorespaces Benchmark Commands}}{76}{table.caption.64}%
+\contentsline {table}{\numberline {51}{\ignorespaces Key Dependencies and Acknowledgments}}{77}{table.caption.65}%

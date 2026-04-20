@@ -1,0 +1,42 @@
+# Prometheus scrape config for miniforge. v2 — opt-in via `scripts/obs-up.ps1`.
+# Download Prometheus 3.x Windows zip from https://prometheus.io/download/ and:
+#   .\prometheus.exe --config.file="config\prometheus.yml" --web.listen-address="127.0.0.1:9090"
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: engine_manager
+    static_configs:
+      - targets: ["127.0.0.1:9292"]
+        labels: { role: "router" }
+
+  - job_name: miniforge_server
+    static_configs:
+      - targets: ["127.0.0.1:8003"]
+        labels: { engine: "miniforge" }
+
+  - job_name: airllm_server
+    static_configs:
+      - targets: ["127.0.0.1:8004"]
+        labels: { engine: "airllm" }
+
+  # llama.cpp and ik_llama.cpp expose /metrics when started with --metrics.
+  - job_name: llama_vulkan
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["127.0.0.1:8001"]
+        labels: { engine: "llama_vulkan" }
+
+  - job_name: ik_llama
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["127.0.0.1:8002"]
+        labels: { engine: "ik_llama" }
+
+  # LiteLLM exposes /metrics when started with `--config config/litellm.yaml`.
+  - job_name: litellm
+    static_configs:
+      - targets: ["127.0.0.1:4000"]
+        labels: { role: "gateway" }

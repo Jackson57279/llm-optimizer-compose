@@ -1,0 +1,11 @@
+Large Language Models (LLMs) have revolutionized natural language processing, yet deploying them locally on consumer hardware remains challenging due to memory constraints and computational requirements. This paper presents Miniforge, a high-performance inference engine optimized for running the MiniMax M2.7 model on resource-constrained devices, specifically the GMKtech M7 platform with 28GB RAM and an AMD Ryzen 7 PRO 6850H processor.
+
+Miniforge addresses three critical challenges in local LLM deployment: (1) aggressive memory optimization through GGUF quantization and TurboQuant KV cache compression, enabling the full 192K context window within 24GB of usable system memory; (2) optimized CPU inference achieving 15-25 tokens/second generation throughput, exceeding the 10 TPS target for interactive applications; (3) a unified async-first API supporting streaming generation, tool calling, and multimodal processing.
+
+We introduce novel memory management techniques specifically designed for the 28GB constraint, including automatic quantization selection, dynamic context window sizing, and working memory reservation. Our TurboQuant implementation achieves 3-bit KV cache compression while maintaining retrieval accuracy above 95\% on needle-in-haystack tests.
+
+Comprehensive benchmarks demonstrate Miniforge's effectiveness: Q4\_K\_M quantization with turbo3 KV cache consumes only 4-5GB total memory while supporting the full 192K context; prompt processing achieves 50-100 tokens/second depending on context length; and quality benchmarks show minimal degradation compared to FP16 baseline, with overall quality scores above 85\%.
+
+Miniforge is open-source and available at \url{https://github.com/Zapdev-labs/miniforge}, providing researchers and developers with a production-ready platform for efficient local LLM inference.
+
+\textbf{Keywords:} Large Language Models, Local Inference, Quantization, KV Cache Compression, CPU Optimization, Memory Management, MiniMax, GGUF, TurboQuant

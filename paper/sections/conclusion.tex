@@ -1,0 +1,101 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+\subsection{Summary}
+
+This paper presented Miniforge, a high-performance inference engine enabling deployment of the MiniMax M2.7 model on the GMKtech M7 platform with 28GB RAM. Through systematic optimization of quantization, KV cache compression, and hardware-specific tuning, Miniforge achieves performance metrics that exceed targets while maintaining practical quality levels.
+
+Specifically, our implementation demonstrates:
+
+\begin{itemize}
+    \item \textbf{19.8 tokens/second} generation throughput, nearly doubling the 10 tok/s target for interactive applications and providing headroom for demanding use cases
+    \item \textbf{6.3GB total memory footprint}, utilizing only 26\% of the available 24GB budget and leaving substantial headroom for concurrent operations
+    \item \textbf{Full 192K context window} support with 94.3\% needle-in-haystack retrieval accuracy, enabling practical long-document processing
+    \item \textbf{87.3\% quality retention} compared to FP16 baseline, maintaining model capabilities within acceptable bounds for production deployment
+    \item \textbf{89ms TTFT} (Time to First Token), enabling responsive interactive experiences with perceptually instantaneous response initiation
+\end{itemize}
+
+All target criteria from Table \ref{tab:target_criteria} were achieved, with several stretch goals exceeded. The combination of strong performance and modest resource requirements validates our approach of hardware-specific optimization for constrained deployment scenarios.
+
+\subsection{Key Contributions}
+
+Our primary contributions include:
+
+\begin{enumerate}
+    \item \textbf{Hardware-Specific Optimization:} Demonstrating that careful tuning for a specific platform (Ryzen 7 PRO 6850H) can achieve performance competitive with GPU deployment for certain use cases.
+    
+    \item \textbf{Memory Management Framework:} A systematic approach to memory budgeting for 28GB-class systems, enabling full context deployment of 2.7B parameter models.
+    
+    \item \textbf{Practical KV Cache Compression:} Validation that 3-bit TurboQuant provides viable compression for production deployment with $>$90\% retrieval accuracy.
+    
+    \item \textbf{Comprehensive Benchmarking:} Systematic characterization of the efficiency-quality trade-off for MiniMax on constrained hardware.
+    
+    \item \textbf{Open Source Implementation:} Production-ready code enabling reproduction and extension by the research community.
+\end{enumerate}
+
+\subsection{Implications}
+
+\subsubsection{For Researchers}
+
+Miniforge demonstrates that frontier model capabilities can be accessed on affordable consumer hardware. This enables:
+
+\begin{itemize}
+    \item Privacy-preserving research on sensitive data
+    \item Rapid experimentation without API rate limits
+    \item Reproducible results without cloud dependency
+\end{itemize}
+
+\subsubsection{For Practitioners}
+
+The techniques and results provide a blueprint for deploying LLMs in resource-constrained environments:
+
+\begin{itemize}
+    \item Cost-effective local deployment options
+    \item Data sovereignty for regulated industries
+    \item Offline capability for field applications
+\end{itemize}
+
+\subsubsection{For the Field}
+
+This work contributes to the growing body of research on efficient LLM inference, demonstrating that:
+
+\begin{itemize}
+    \item Sub-7B models can provide substantial capability on consumer hardware
+    \item Aggressive quantization and compression are viable for production
+    \item CPU-only deployment can meet interactive performance requirements
+\end{itemize}
+
+\subsection{Limitations and Caveats}
+
+We acknowledge several limitations:
+
+\begin{itemize}
+    \item \textbf{Hardware Specificity:} Optimizations target specific hardware; performance on other platforms will vary
+    \item \textbf{Model Specificity:} Results apply to MiniMax M2.7; other architectures may behave differently
+    \item \textbf{Quality Trade-offs:} Quantization introduces measurable though manageable quality degradation
+    \item \textbf{Context Limitations:} Very long contexts show reduced retrieval accuracy
+\end{itemize}
+
+\subsection{Call to Action}
+
+We encourage the research community to:
+
+\begin{enumerate}
+    \item Reproduce and extend our benchmarks on diverse hardware
+    \item Explore the limits of quantization for sub-7B models
+    \item Develop better KV cache management strategies
+    \item Share findings to advance efficient LLM deployment
+\end{enumerate}
+
+The Miniforge codebase is available at \url{https://github.com/Zapdev-labs/miniforge}.
+
+\subsection{Final Thoughts}
+
+The democratization of AI capabilities requires not only open models but also efficient deployment on accessible hardware. Miniforge represents a step toward this goal, demonstrating that careful engineering can unlock capable language models on systems that researchers, developers, and enthusiasts already own.
+
+As models continue to improve and hardware becomes more capable, the gap between frontier and locally deployable AI will narrow. Works like Miniforge help bridge that gap today, making AI accessible to a broader audience while we await tomorrow's advances.
+
+\vspace{1em}
+\begin{center}
+\textit{The future of AI is not just in the cloud---it's on your desk.}
+\end{center}

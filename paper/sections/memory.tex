@@ -1,0 +1,285 @@
+\section{Memory Management Framework}
+\label{sec:memory}
+
+\subsection{The 28GB Constraint}
+
+The GMKtech M7's 28GB total memory (with 4GB allocated to iGPU VRAM) represents a challenging constraint for LLM deployment. This section details our memory management framework designed to operate effectively within this limit.
+
+\subsubsection{Memory Budget Analysis}
+
+Breaking down the available 24GB for model inference:
+
+\begin{table}[h]
+\centering
+\caption{Memory Budget Allocation}
+\label{tab:memory_budget}
+\begin{tabular}{llc}
+\toprule
+\textbf{Component} & \textbf{Description} & \textbf{Allocation (GB)} \\
+\midrule
+OS / WSL2 & System overhead & 4.0 (already reserved) \\
+Working Memory & Temporary buffers & 2.0 \\
+Safety Margin & Headroom for spikes & 2.0 \\
+Model Weights & Quantized parameters & 1.5 - 2.5 \\
+KV Cache & Attention state storage & 14.0 - 16.0 \\
+\midrule
+\textbf{Total} & & \textbf{19.5 - 24.5} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The KV cache dominates memory consumption, motivating our aggressive compression strategy.
+
+\subsection{Automatic Quantization Selection}
+
+The MemoryManager automatically selects appropriate quantization based on available memory and model size.
+
+\subsubsection{Selection Algorithm}
+
+The quantization selection process considers:
+
+\begin{enumerate}
+    \item \textbf{Model Size:} Parameters in billions
+    \item \textbf{Target Context:} Desired maximum context length
+    \item \textbf{Available Memory:} Current system state
+    \item \textbf{Quality Requirements:} Minimum acceptable accuracy
+\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Quantization Selection Algorithm}
+\label{alg:quant_selection}
+\begin{algorithmic}[1]
+\Require Model parameters $P$ (billions), Available memory $M$ (GB)
+\Ensure Selected quantization $Q$
+\State $S_{FP16} \gets P \times 2$ \Comment{FP16 size in GB}
+\State $ratios \gets \{Q8\_0: 1.0, Q6\_K: 0.75, Q5\_K\_M: 0.625, Q4\_K\_M: 0.5, Q3\_K\_M: 0.375\}$
+\State $KV_{overhead} \gets 2.6$ \Comment{Approximate for 192K context with turbo3}
+\State $working \gets 2.0$
+\For{$Q$ in preference\_order}
+    \State $model\_size \gets S_{FP16} \times ratios[Q]$
+    \State $total \gets model\_size + KV_{overhead} + working$
+    \If{$total \leq M \times 0.85$}
+        \State \Return $Q$
+    \EndIf
+\EndFor
+\State \Return $Q2\_K$ \Comment{Fallback to most aggressive}
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Preference Ordering}
+
+The default preference ordering (Q4\_K\_M, Q5\_K\_M, Q6\_K, Q8\_0, Q3\_K\_M, Q2\_K) reflects a balance between quality and compression:
+
+\begin{itemize}
+    \item Q4\_K\_M offers the best quality/size trade-off for most applications
+    \item Q5\_K\_M for quality-critical applications with memory headroom
+    \item Q6\_K and Q8\_0 when quality is paramount
+    \item Q3\_K\_M and Q2\_K only when memory is severely constrained
+\end{itemize}
+
+\subsection{Dynamic Context Window Calculation}
+
+Beyond model size, the context window significantly impacts memory requirements.
+
+\subsubsection{KV Cache Size Formula}
+
+For a given context length $T$ and KV cache quantization $Q$:
+
+\begin{equation}
+M_{KV}(T, Q) = 2 \times L \times H \times d_h \times T \times b(Q)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $L = 32$ (number of layers)
+    \item $H = 32$ (number of heads)
+    \item $d_h = 96$ (head dimension)
+    \item $b(Q)$ is bytes per element for quantization $Q$
+\end{itemize}
+
+Bytes per element for different quantization schemes:
+
+\begin{table}[h]
+\centering
+\caption{KV Cache Bytes per Element by Quantization}
+\label{tab:kv_bytes}
+\begin{tabular}{lc}
+\toprule
+\textbf{Quantization} & \textbf{Bytes per Element} \\
+\midrule
+FP16 & 2.0 \\
+Q8\_0 & 1.0 \\
+Q4\_0 & 0.5 \\
+Turbo4 & 0.5625 ($\approx$ 4.5 bits) \\
+Turbo3 & 0.4375 ($\approx$ 3.5 bits) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Context Size Calculation}
+
+Given available memory $M_{avail}$ after model and working memory:
+
+\begin{equation}
+T_{max} = \left\lfloor \frac{M_{avail} \times 1024^3}{2 \times L \times H \times d_h \times b(Q)} \right\rfloor
+\end{equation}
+
+For MiniMax M2.7 with turbo3 (14KB/token effective):
+
+\begin{itemize}
+    \item With 6GB available: $T_{max} \approx 458,000$ tokens (theoretical)
+    \item Practical limit: 194,560 (192K usable after safety margin)
+\end{itemize}
+
+\subsection{Safety Margins and Limits}
+
+The memory manager implements multiple safety mechanisms:
+
+\subsubsection{Safety Factor}
+
+Default safety factor of 0.85 ensures headroom:
+
+\begin{equation}
+M_{usable} = M_{available} \times 0.85
+\end{equation}
+
+This accommodates:
+\begin{itemize}
+    \item Temporary allocations during generation
+    \item Memory fragmentation
+    \item Operating system fluctuations
+    \item Garbage collection pauses (Python)
+\end{itemize}
+
+\subsubsection{Hard Limits}
+
+Hard limits prevent allocation beyond physical capacity. The memory check function accounts for already allocated resources:
+
+\textbf{Memory Check Logic:}
+\begin{enumerate}
+    \item Query current system memory statistics
+    \item Subtract existing model weights allocation
+    \item Subtract current KV cache allocation
+    \item Compare remaining against requested requirement
+\end{enumerate}
+
+This ensures that cumulative allocations never exceed available physical memory, preventing OOM crashes.
+
+\subsection{Memory Tracking and Statistics}
+
+The MemoryManager provides comprehensive memory tracking through a structured statistics interface:
+
+\begin{table}[h]
+\centering
+\caption{Memory Statistics Fields}
+\label{tab:memory_stats_fields}
+\begin{tabular}{lll}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\
+\midrule
+total\_gb & float & Total system RAM capacity \\
+available\_gb & float & Currently unallocated memory \\
+used\_gb & float & Currently allocated memory \\
+percent\_used & float & Memory utilization percentage \\
+model\_memory\_gb & float & Memory allocated to model weights \\
+kv\_cache\_gb & float & Memory allocated to KV cache \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These statistics are collected periodically and exposed for monitoring, alerting, and debugging purposes.
+
+\subsection{Optimal Settings Generation}
+
+The optimal settings generation method produces complete configurations tailored to the target model and hardware. The process involves:
+
+\textbf{Configuration Generation Steps:}
+\begin{enumerate}
+    \item \textbf{Quantization Selection:} Choose compression level based on model size
+    \item \textbf{Size Calculation:} Compute quantized model footprint using compression ratios
+    \item \textbf{Context Calculation:} Determine maximum context given remaining memory
+    \item \textbf{Thread Allocation:} Set thread count to physical CPU cores
+    \item \textbf{Batch Sizing:} Configure batch and micro-batch sizes based on context
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\caption{Batch Size Selection Criteria}
+\label{tab:batch_sizing}
+\begin{tabular}{lll}
+\toprule
+\textbf{Context Size} & \textbf{Batch Size} & \textbf{Micro-Batch} \\
+\midrule
+$\geq$ 131,072 tokens & 2048 & 512 \\
+$\geq$ 8,192 tokens & 1024 & 512 \\
+$<$ 8,192 tokens & 512 & 256 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The resulting configuration includes all parameters needed for backend initialization, optimized for the GMKtech M7 platform.
+
+\subsection{Context Fallback Strategy}
+
+When initial allocation fails, the system implements context fallback:
+
+\begin{enumerate}
+    \item Attempt requested context size
+    \item If OOM, try progressively smaller sizes: 131K, 98K, 65K, 49K, 32K, 16K, 8K, 4K
+    \item Report actual context achieved
+    \item Allow user to accept or retry with different quantization
+\end{enumerate}
+
+This graceful degradation ensures the model loads successfully even under memory pressure.
+
+\subsection{Working Memory Reservation}
+
+Working memory accommodates temporary allocations during generation:
+
+\begin{itemize}
+    \item \textbf{Activation buffers:} Intermediate computation results
+    \item \textbf{Attention matrices:} Temporary attention scores
+    \item \textbf{Sampling state:} Temperature, top-k/p tracking
+    \item \textbf{Python overhead:} GC, interpreter overhead
+\end{itemize}
+
+We reserve 2GB for working memory, sufficient for MiniMax M2.7 with substantial headroom.
+
+\subsection{Memory Profiling and Diagnostics}
+
+The framework includes diagnostic capabilities for memory usage analysis:
+
+\textbf{Profiling Process:}
+\begin{enumerate}
+    \item \textbf{Baseline Capture:} Record initial memory state before generation
+    \item \textbf{Execution:} Run generation with specified prompt and token count
+    \item \textbf{Peak Detection:} Identify maximum memory usage during operation
+    \item \textbf{Analysis:} Calculate increase and capture allocation snapshots
+\end{enumerate}
+
+\textbf{Collected Metrics:}
+\begin{itemize}
+    \item Baseline RSS memory (MB)
+    \item Peak memory consumption (MB)
+    \item Net increase from baseline (MB)
+    \item Allocation snapshots for leak detection
+\end{itemize}
+
+This profiling capability enables developers to identify memory-intensive operations and validate optimization effectiveness.
+
+\subsection{Memory Efficiency Score}
+
+We define a composite memory efficiency score:
+
+\begin{equation}
+\text{Efficiency} = 0.4 \times \frac{M_{theoretical}}{M_{actual}} + 0.3 \times \left(1 - \frac{M_{peak} - M_{post\_gc}}{M_{peak}}\right) + 0.3 \times \frac{T_{achieved}}{T_{target}}
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item Theoretical vs actual memory: How close to optimal allocation
+    \item GC recovery: How much memory is released after cleanup
+    \item Context achievement: Fraction of target context achieved
+\end{itemize}
+
+Scores range from 0 to 100, with Miniforge typically achieving 85-95 on the M7 platform.

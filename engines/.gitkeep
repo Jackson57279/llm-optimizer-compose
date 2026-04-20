@@ -1,0 +1,2 @@
+# engines/ holds downloaded/built binaries per engine subdir (llama-cpp-vulkan/, ik-llama/).
+# Contents are large and machine-specific; keep the folder tracked but ignore contents.

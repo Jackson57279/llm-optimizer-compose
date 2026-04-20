@@ -1,0 +1,244 @@
+\section{Benchmark Methodology}
+\label{sec:benchmarks}
+
+\subsection{Benchmark Suite Overview}
+
+We developed a comprehensive benchmark suite evaluating Miniforge across four dimensions:
+
+\begin{enumerate}
+    \item \textbf{Performance:} Throughput, latency, and processing speed
+    \item \textbf{Memory:} Usage patterns, scaling, and efficiency
+    \item \textbf{Context:} Retrieval accuracy and maximum effective context
+    \item \textbf{Quality:} Output quality across diverse tasks
+\end{enumerate}
+
+\subsection{Performance Benchmarks}
+
+\subsubsection{Token Throughput}
+
+Measures generation speed in tokens per second:
+
+\begin{itemize}
+    \item Test prompts: short (100 tokens), medium (500 tokens), long (2000 tokens)
+    \item Generation length: 512 tokens
+    \item Warmup: 2 iterations
+    \item Measurement: 5 iterations, report mean and standard deviation
+\end{itemize}
+
+\subsubsection{Time-to-First-Token (TTFT)}
+
+Measures latency until first output token:
+
+\begin{itemize}
+    \item Streaming generation to capture first token timing
+    \item Report mean, P95, and P99 latencies
+    \item Critical for interactive applications
+\end{itemize}
+
+\subsubsection{Inter-Token Latency (ITL)}
+
+Measures time between consecutive tokens:
+
+\begin{itemize}
+    \item Streaming generation with per-token timing
+    \item Report mean and P95 ITL
+    \item Target: $<$100ms for responsive feel
+\end{itemize}
+
+\subsubsection{Prompt Processing}
+
+Measures speed of processing input context:
+
+\begin{itemize}
+    \item Context sizes: 512, 1024, 2048, 4096, 8192, 16384, 32768 tokens
+    \item Generate single token to measure processing time
+    \item Report tokens per second for each context size
+\end{itemize}
+
+\subsection{Memory Benchmarks}
+
+\subsubsection{Memory Overhead by Context}
+
+Measures memory consumption at different context lengths:
+
+\begin{itemize}
+    \item Context sizes: 512, 2048, 8192, 32768, 65536, 131072
+    \item Measure RSS increase after processing each context
+    \item Calculate bytes per token scaling factor
+\end{itemize}
+
+\subsubsection{Memory Efficiency Score}
+
+Composite metric combining:
+
+\begin{equation}
+\text{Efficiency} = 0.4 \times \text{Theoretical Ratio} + 0.3 \times \text{GC Recovery} + 0.3 \times \text{Context Achievement}
+\end{equation}
+
+\subsubsection{Generation Memory Stability}
+
+Monitors memory during extended generation:
+
+\begin{itemize}
+    \item 512 token generation
+    \item Sample memory every 100ms
+    \item Measure peak, mean, and variance
+    \item Check for memory leaks
+\end{itemize}
+
+\subsection{Context Benchmarks}
+
+\subsubsection{Needle-in-Haystack}
+
+Tests retrieval of specific information at different context positions:
+
+\begin{itemize}
+    \item Context lengths: 1024, 4096, 16384, 65536, 131072
+    \item Depths: 0\%, 25\%, 50\%, 75\%, 100\%
+    \item 8 different needle facts tested
+    \item Report overall accuracy and accuracy by position
+\end{itemize}
+
+\subsubsection{Multi-Needle Retrieval}
+
+Tests retrieval of multiple facts from same context:
+
+\begin{itemize}
+    \item Insert 5 different facts into context
+    \item Query for each fact separately
+    \item Report individual and aggregate accuracy
+\end{itemize}
+
+\subsubsection{Maximum Context Test}
+
+Determines effective maximum context window:
+
+\begin{itemize}
+    \item Test progressively larger contexts: 8K, 16K, 32K, 64K, 128K, 192K
+    \item Simple retrieval task at each size
+    \item First failure indicates maximum
+\end{itemize}
+
+\subsection{Quality Benchmarks}
+
+\subsubsection{Question Answering}
+
+Tests factual knowledge retrieval:
+
+\begin{itemize}
+    \item 50 questions across domains
+    \item Check for correct answer presence
+    \item Report accuracy percentage
+\end{itemize}
+
+\subsubsection{Mathematical Reasoning}
+
+Tests numerical problem solving:
+
+\begin{itemize}
+    \item 30 problems from GSM8K subset
+    \item Step-by-step reasoning evaluation
+    \item Report solve rate and explanation quality
+\end{itemize}
+
+\subsubsection{Summarization}
+
+Tests text compression quality:
+
+\begin{itemize}
+    \item 10 documents (news, technical, narrative)
+    \item Generate summaries
+    \item Evaluate concept coverage and coherence
+\end{itemize}
+
+\subsubsection{Instruction Following}
+
+Tests adherence to formatting instructions:
+
+\begin{itemize}
+    \item 20 tasks with specific format requirements
+    \item JSON output, numbered lists, length constraints
+    \item Report instruction following accuracy
+\end{itemize}
+
+\subsubsection{Coherence}
+
+Tests consistency in long-form generation:
+
+\begin{itemize}
+    \item 300-word story generation
+    \item Evaluate logical flow and consistency
+    \item Check for contradictions
+\end{itemize}
+
+\subsection{Benchmark Infrastructure}
+
+\subsubsection{Automated Test Runner}
+
+The benchmark runner orchestrates test execution and result aggregation:
+
+\textbf{Runner Workflow:}
+\begin{enumerate}
+    \item Initialize benchmark report with timestamp
+    \item Iterate through selected benchmark modules
+    \item Execute each runner with the target model
+    \item Collect results and store in report
+    \item Generate statistical summary
+    \item Return complete benchmark report
+\end{enumerate}
+
+\textbf{Report Contents:}
+\begin{itemize}
+    \item Timestamp and system configuration
+    \item Individual benchmark results with raw data
+    \item Statistical summaries (mean, std dev, percentiles)
+    \item Pass/fail indicators against targets
+\end{itemize}
+
+\subsubsection{Result Storage}
+
+Results stored as JSON with:
+
+\begin{itemize}
+    \item Timestamp and system information
+    \item Individual test results with raw data
+    \item Statistical summaries
+    \item Metadata for reproduction
+\end{itemize}
+
+\subsubsection{Visualization}
+
+HTML reports with:
+
+\begin{itemize}
+    \item Summary tables
+    \item Performance charts
+    \item Comparison views
+    \item Raw data export
+\end{itemize}
+
+\subsection{Statistical Methodology}
+
+\subsubsection{Sample Size}
+
+\begin{itemize}
+    \item Minimum 5 iterations per measurement
+       \item Discard first iteration as warmup
+    \item Report mean, standard deviation, and confidence intervals
+\end{itemize}
+
+\subsubsection{Outlier Handling}
+
+\begin{itemize}
+    \item Identify outliers using IQR method
+    \item Investigate and report outliers
+    \item Optionally exclude if due to external factors
+\end{itemize}
+
+\subsubsection{Reproducibility}
+
+\begin{itemize}
+    \item Fixed random seeds where applicable
+    \item Document system configuration
+    \item Container-based testing for consistency
+\end{itemize}

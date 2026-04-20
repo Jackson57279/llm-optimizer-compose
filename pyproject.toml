@@ -1,0 +1,150 @@
+[project]
+name = "miniforge"
+version = "0.2.0"
+description = "Native-Windows multi-engine LLM stack for MiniMax / Kimi / DeepSeek on GMKtech M7 and similar"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Zapdev Labs" }]
+keywords = [
+    "llm",
+    "inference",
+    "minimax",
+    "gguf",
+    "quantization",
+    "amd",
+    "vulkan",
+    "moe",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "transformers>=4.40.0",
+    "torch>=2.2.0",
+    "pydantic>=2.0",
+    "aiohttp>=3.9",
+    "psutil>=5.9",
+    "pillow>=10.0",
+    "huggingface-hub>=0.20",
+    "tqdm>=4.66",
+    "pyyaml>=6.0",
+    "typing-extensions>=4.8",
+    "numpy>=1.24",
+    "llama-cpp-python>=0.3.20",
+]
+
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "starlette>=0.36.0",
+    "sse-starlette>=2.0",
+    "prometheus-client>=0.20",
+    "httpx>=0.27",
+]
+bench = [
+    # guidellm is optional — our runner.py handles the core streaming bench.
+    # To enable guidellm sweeps: uv pip install guidellm --prerelease=allow
+    "httpx>=0.27",
+]
+airllm = ["airllm>=2.11", "accelerate>=0.30", "bitsandbytes>=0.43"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "black>=24.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+]
+all = ["miniforge[server,bench,dev]"]
+
+[project.urls]
+Homepage = "https://github.com/Zapdev-labs/miniforge"
+Repository = "https://github.com/Zapdev-labs/miniforge"
+Issues = "https://github.com/Zapdev-labs/miniforge/issues"
+
+[project.scripts]
+miniforge = "miniforge.cli:main"
+miniforge-server = "miniforge.server.openai_server:main"
+miniforge-launch = "miniforge.launcher.engine_manager:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "black>=24.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8",
+]
+
+[tool.uv.pip]
+# PyTorch CPU wheels are available here; use --index-strategy unsafe-best-match
+# if you need specific torch+cpu builds on a no-GPU box.
+extra-index-url = ["https://download.pytorch.org/whl/cpu"]
+index-strategy = "unsafe-best-match"
+
+[tool.black]
+line-length = 100
+target-version = ['py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | engines
+)/
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = ["engines", ".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008", "C901", "N818"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = false
+strict_equality = true
+show_error_codes = true
+exclude = ["engines/", "build/", "dist/", ".venv/"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/miniforge"]
+
+[tool.hatch.build]
+dev-mode-dirs = ["src"]

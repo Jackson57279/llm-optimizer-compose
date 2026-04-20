@@ -1,0 +1,141 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\subsection{The Challenge of Local LLM Deployment}
+
+The emergence of Large Language Models (LLMs) has fundamentally transformed the landscape of artificial intelligence and natural language processing over the past decade. Beginning with the Transformer architecture introduced by Vaswani et al. in 2017 \cite{vaswani2017attention}, the field has witnessed exponential growth in model capabilities, driven by increases in parameter count, training data, and computational resources. Models like GPT-4, Claude, Llama, and their successors have demonstrated remarkable capabilities across a wide range of tasks, from creative writing to code generation, mathematical reasoning to multimodal understanding.
+
+However, these capabilities come at a significant computational cost. State-of-the-art models often require tens or hundreds of gigabytes of GPU memory, specialized hardware accelerators, and substantial power consumption. For instance, deploying GPT-4-class models locally would require hundreds of gigabytes of VRAM, placing them firmly out of reach for all but the best-funded institutions.
+
+This resource intensity creates a fundamental tension in the deployment of LLMs. While cloud-based APIs provide convenient access to powerful models, they introduce significant concerns:
+
+\begin{itemize}
+    \item \textbf{Data Privacy:} Sensitive information must be transmitted to third-party servers, creating compliance challenges for regulated industries and privacy concerns for individual users.
+    \item \textbf{Latency:} Network round-trips introduce delays that can render applications unresponsive, particularly for real-time use cases.
+    \item \textbf{Cost:} API usage fees accumulate rapidly for high-volume applications, potentially exceeding the cost of local hardware over time.
+    \item \textbf{Vendor Lock-in:} Dependence on specific providers creates business continuity risks and limits flexibility.
+    \item \textbf{Rate Limits:} API quotas constrain experimentation and high-throughput applications.
+\end{itemize}
+
+Local deployment offers an alternative but is often perceived as requiring expensive hardware investments beyond the reach of individual researchers, small teams, or hobbyist developers. The prevailing assumption has been that capable local inference requires high-end GPUs with substantial VRAM, creating a barrier to entry that excludes many potential users.
+
+\begin{tcolorbox}[title=The Local LLM Challenge]
+How can we make capable language models accessible on widely available consumer hardware, without sacrificing the interactive performance and quality that make LLMs useful?
+\end{tcolorbox}
+
+\subsection{The MiniMax M2.7 Opportunity}
+
+The release of MiniMax-M2.7 in 2025 presented a unique opportunity to address this challenge. With 2.7 billion parameters, MiniMax represents a sweet spot in the efficiency-capability trade-off:
+
+\begin{itemize}
+    \item \textbf{Compact Architecture:} At 2.7B parameters, the model is significantly smaller than 7B or 13B alternatives while maintaining strong performance on key benchmarks.
+    \item \textbf{Extended Context:} A 196,608 token context window enables applications requiring long-document processing, extended conversations, and complex reasoning chains.
+    \item \textbf{Strong Foundation:} MiniMax demonstrates competitive performance on MMLU, GSM8K, and other standard benchmarks relative to larger models.
+    \item \textbf{Open Weights:} Public availability enables optimization research and local deployment experimentation.
+\end{itemize}
+
+However, realizing this opportunity required solving several significant engineering challenges. A naive deployment of MiniMax M2.7 in FP16 precision would consume approximately 5.4GB for weights alone. The KV cache for the full context window would require an additional 12-14GB, bringing total memory requirements to 17-20GB before accounting for activations, working memory, and system overhead. On a 28GB system, this leaves insufficient headroom for practical deployment.
+
+\subsection{The GMKtech M7 Platform}
+
+The GMKtech M7 represents an emerging class of compact, high-performance computing platforms designed for edge AI and local inference. Its specifications (Table \ref{tab:m7_specs}) make it an ideal target for optimizing local LLM deployment.
+
+\begin{table}[h]
+\centering
+\caption{GMKtech M7 Platform Specifications}
+\label{tab:m7_specs}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+CPU & AMD Ryzen 7 PRO 6850H (8 cores, 16 threads) \\
+Base Clock & 3.2 GHz (Boost up to 4.7 GHz) \\
+Total System RAM & 32 GB DDR5-4800 \\
+Allocated VRAM & 4 GB (shared with system RAM) \\
+Available for LLM & $\approx$24 GB \\
+Operating System & Windows 11 / WSL2 \\
+Peak Power Draw & 65W \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Ryzen 7 PRO 6850H features AMD's Zen 3+ architecture with AVX2 support, providing substantial vector processing capability for matrix operations. The unified memory architecture, while limiting total available RAM, eliminates data transfer bottlenecks between CPU and GPU that plague discrete GPU deployments.
+
+\subsection{Research Questions and Contributions}
+
+This paper addresses three primary research questions:
+
+\begin{enumerate}[label=\textbf{RQ\arabic*:}]
+    \item \textbf{Memory Efficiency:} What quantization and compression strategies enable deployment of MiniMax M2.7 with full 192K context within 24GB of system memory?
+    \item \textbf{Inference Performance:} What optimizations achieve interactive generation speeds (target 10+ tokens/second) on CPU-only inference?
+    \item \textbf{Quality Preservation:} How do aggressive quantization and compression impact model quality across diverse tasks?
+\end{enumerate}
+
+Our contributions include:
+
+\begin{enumerate}
+    \item \textbf{Miniforge System:} A complete, production-ready inference engine with novel optimizations for constrained hardware (Section \ref{sec:architecture}).
+    
+    \item \textbf{Memory Management Framework:} Automatic quantization selection, dynamic context sizing, and working memory reservation specifically designed for 28GB-class hardware (Section \ref{sec:memory}).
+    
+    \item \textbf{TurboQuant Implementation:} Practical 3-bit KV cache compression with demonstrated retrieval accuracy $>$95\% (Section \ref{sec:kv_cache}).
+    
+    \item \textbf{Comprehensive Benchmarking:} Systematic evaluation across performance, memory, context retrieval, and quality dimensions, establishing baseline metrics for MiniMax on constrained hardware (Section \ref{sec:benchmarks}).
+    
+    \item \textbf{Open Source Release:} Full implementation available for reproduction and extension (Appendix \ref{appendix:code}).
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows. Section \ref{sec:background} reviews relevant background on LLM inference, quantization, and local deployment approaches. Section \ref{sec:architecture} presents the Miniforge system architecture and design principles. Section \ref{sec:hardware} discusses hardware-specific optimizations for the GMKtech M7. Section \ref{sec:memory} details our memory management framework. Sections \ref{sec:quantization} and \ref{sec:kv_cache} analyze quantization strategies and KV cache compression respectively. Section \ref{sec:backends} compares inference backends. Section \ref{sec:implementation} covers implementation details. Sections \ref{sec:experimental} through \ref{sec:analysis} present our experimental methodology, results, and analysis. Section \ref{sec:related_work} situates our work in the broader literature. Section \ref{sec:future_work} identifies directions for future research. Section \ref{sec:conclusion} concludes.
+
+\subsection{Target Performance Criteria}
+
+We establish the following target criteria for evaluating Miniforge's success:
+
+\begin{table}[h]
+\centering
+\caption{Target Performance Criteria}
+\label{tab:target_criteria}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Target} & \textbf{Stretch} \\
+\midrule
+Generation Throughput & 10 tok/s & 20 tok/s \\
+Prompt Processing (4K) & 50 tok/s & 100 tok/s \\
+Memory Footprint & $<$8 GB & $<$6 GB \\
+Context Window Support & 128K tokens & 192K tokens \\
+Needle-in-Haystack Accuracy & 90\% & 95\% \\
+Quality Score (vs FP16) & $>$85\% & $>$90\% \\
+TTFT (Time to First Token) & $<$500ms & $<$200ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These criteria reflect practical requirements for interactive applications while acknowledging the constraints of the target hardware platform. Throughout this paper, we evaluate Miniforge against these targets and report both absolute performance and relative achievement.
+
+\subsection{Broader Impact}
+
+The democratization of LLM access carries significant implications for AI equity, privacy, and innovation. By enabling capable model deployment on affordable consumer hardware, Miniforge contributes to:
+
+\begin{itemize}
+    \item \textbf{Research Accessibility:} Students and independent researchers can experiment with frontier models without cloud API costs or institutional GPU cluster access.
+    \item \textbf{Data Privacy:} Sensitive applications can process data locally, eliminating transmission to third-party servers.
+    \item \textbf{Offline Operation:} Applications can function without network connectivity, critical for field deployment and areas with limited internet access.
+    \item \textbf{Environmental Considerations:} Local inference on optimized hardware may have lower carbon footprint than repeated cloud API calls for high-volume applications.
+\end{itemize}
+
+However, we acknowledge potential risks: easier access to powerful models could facilitate misuse, and optimization research must remain mindful of safety considerations. We discuss these issues in Section \ref{sec:related_work}.
+
+\subsection{Related Work Context}
+
+Miniforge builds upon a rich body of work in efficient LLM inference. Projects like llama.cpp, vLLM, and TensorRT-LLM have established critical techniques including GGUF quantization, PagedAttention, and kernel fusion. Miniforge contributes to this ecosystem by:
+
+\begin{enumerate}
+    \item Specializing optimizations for sub-7B parameter models on CPU-only platforms
+    \item Developing memory management specifically for 28GB-class unified memory systems
+    \item Providing comprehensive empirical characterization of the efficiency-quality trade-off at aggressive compression levels
+    \item Delivering a unified Python API with async support and multimodal capabilities
+\end{enumerate}
+
+We provide detailed comparison with related work in Section \ref{sec:related_work}.

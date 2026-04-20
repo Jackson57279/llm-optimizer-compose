@@ -1,0 +1,126 @@
+# LiteLLM proxy config for miniforge.
+# Start with:
+#   litellm --config config/litellm.yaml --port 4000 --host 127.0.0.1
+#
+# Every alias below proxies to the engine_manager on :9292, which knows how to
+# swap/preload the right engine for each alias.
+
+model_list:
+  # ----- MiniMax-M2.7 FULL 228B (UD-IQ2_XXS, already on disk) -----
+  - model_name: minimax-m27-full-vulkan
+    litellm_params:
+      model: "openai/minimax-m27-full-vulkan"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: minimax-m27-full-miniforge
+    litellm_params:
+      model: "openai/minimax-m27-full-miniforge"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  # ----- MiniMax-M2.7 REAP-161B (downloaded by pull-models.ps1) -----
+  - model_name: minimax-reap-vulkan
+    litellm_params:
+      model: "openai/minimax-reap-vulkan"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: minimax-reap-ikllama
+    litellm_params:
+      model: "openai/minimax-reap-ikllama"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: minimax-reap-miniforge
+    litellm_params:
+      model: "openai/minimax-reap-miniforge"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: minimax-reap-airllm
+    litellm_params:
+      model: "openai/minimax-reap-airllm"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  # ----- Control models -----
+  - model_name: qwen3-30b-vulkan
+    litellm_params:
+      model: "openai/qwen3-30b-vulkan"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: qwen3-30b-miniforge
+    litellm_params:
+      model: "openai/qwen3-30b-miniforge"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  # ----- Gemma-4-E4B -----
+  - model_name: gemma-4-e4b-vulkan
+    litellm_params:
+      model: "openai/gemma-4-e4b-vulkan"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: gemma-4-e4b-ikllama
+    litellm_params:
+      model: "openai/gemma-4-e4b-ikllama"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+  - model_name: gemma-4-e4b-miniforge
+    litellm_params:
+      model: "openai/gemma-4-e4b-miniforge"
+      api_base: "http://127.0.0.1:9292/v1"
+      api_key: "sk-local"
+
+# Convenience group — sends to the best available engine with fallback cascade.
+# Also: per-alias fallbacks so if one engine (e.g. miniforge) fails to start,
+# requests transparently roll over to a working sibling instead of 500ing.
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 2
+  retry_after: 5
+  allowed_fails: 1                  # one cold-start failure → blacklist briefly
+  cooldown_time: 60                 # re-try a failed engine after 60s
+  fallbacks:
+    - { "minimax-best": [
+        "minimax-reap-ikllama",
+        "minimax-reap-vulkan",
+        "minimax-m27-full-vulkan",
+        "minimax-reap-miniforge",
+      ] }
+    # MiniMax-M2.7 FULL 228B — miniforge (Python) is the most fragile path,
+    # vulkan is the proven one. Route around miniforge when it won't start.
+    - { "minimax-m27-full-miniforge": ["minimax-m27-full-vulkan", "minimax-reap-ikllama", "minimax-reap-vulkan"] }
+    - { "minimax-m27-full-vulkan":    ["minimax-reap-ikllama", "minimax-reap-vulkan"] }
+    # REAP-161B variants — ikllama is usually fastest; vulkan as backup.
+    - { "minimax-reap-miniforge": ["minimax-reap-ikllama", "minimax-reap-vulkan", "minimax-m27-full-vulkan"] }
+    - { "minimax-reap-vulkan":    ["minimax-reap-ikllama", "minimax-m27-full-vulkan"] }
+    - { "minimax-reap-ikllama":   ["minimax-reap-vulkan", "minimax-m27-full-vulkan"] }
+    # Small controls.
+    - { "qwen3-30b-miniforge": ["qwen3-30b-vulkan"] }
+    - { "gemma-4-e4b-miniforge": ["gemma-4-e4b-vulkan", "gemma-4-e4b-ikllama"] }
+    - { "gemma-4-e4b-ikllama":   ["gemma-4-e4b-vulkan"] }
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  telemetry: false
+  request_timeout: 600              # big MoE swap + cold prompt can be slow
+  # In-memory prompt cache — repeated system prompts / few-shot examples
+  # skip re-prefill entirely. TTL 1h, capped so we don't starve the model.
+  cache: true
+  cache_params:
+    type: local
+    ttl: 3600
+    max_size_in_memory: 512
+
+general_settings:
+  master_key: "os.environ/LITELLM_MASTER_KEY"
+  # Prometheus metrics on /metrics
+  proxy_budget_rescheduler_min_time: 0
+  allow_requests_on_db_unavailable: true
+  disable_spend_logs: true

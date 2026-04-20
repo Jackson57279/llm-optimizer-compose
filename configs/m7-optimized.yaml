@@ -1,0 +1,61 @@
+# Miniforge Optimized Configuration
+# For GMKtech M7 (AMD Ryzen 7 PRO 6850H, 28GB RAM)
+
+# Hardware constraints
+max_memory_gb: 24.0        # Leave 4GB for OS/WSL2
+reserve_memory_gb: 4.0
+
+# CPU settings - AGGRESSIVE OPTIMIZATIONS
+n_threads: 16              # Use SMT threads (8 cores * 2 = 16 logical)
+n_batch: 2048              # Larger batches for better throughput
+n_ubatch: 512              # Micro-batch for chunked processing
+cpu_mask: "0-15"           # Use all logical cores
+cpu_strict: false          # Allow scheduler migration
+priority: "high"           # High thread priority (if available)
+
+# CPU ISA extensions (auto-detected if commented out)
+# use_avx: true
+# use_avx2: true
+# use_fma: true
+# use_f16c: true
+
+# Model settings
+n_ctx: 194560              # 192K usable context (196608 - 2048 reserve)
+quantization: UD-IQ2_XXS   # Aggressive 2-bit for 228B+ MoE models
+
+# KV cache compression (TurboQuant = 4.9x memory savings)
+cache_type_k: q4_0         # 4-bit keys (stable across llama.cpp versions)
+cache_type_v: q4_0         # 4-bit values
+cache_quantization_group: 128  # Group size for KV cache
+cache_mixed_precision: true    # Per-layer quantization tuning
+
+# Speculative decoding (draft model acceleration)
+speculative_n_max: 16      # Max draft tokens
+speculative_n_min: 5       # Min draft tokens
+speculative_p_min: 0.8     # Min acceptance probability
+
+# Performance features
+flash_attn: true           # Flash attention for faster inference
+use_mmap: true             # Memory-mapped loading (essential for MoE)
+use_mlock: false           # WSL2 doesn't support mlock well
+
+# Backend selection
+backend: llama_cpp         # llama_cpp (fastest) or transformers
+
+# Generation defaults
+default_max_tokens: 512
+default_temperature: 1.0
+default_top_p: 0.95
+default_top_k: 40
+
+# Feature flags
+enable_tools: true
+enable_vision: true
+enable_streaming: true
+
+# Paths (null = use default)
+cache_dir: null
+
+# Logging
+verbose: false
+log_level: INFO

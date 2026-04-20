@@ -1,0 +1,76 @@
+\begin{thebibliography}{}
+
+\bibitem[Dao et~al., 2022]{dao2022flashattention}
+Dao, T., Fu, D.~Y., Ermon, S., Rudra, A., and R{\'e}, C. (2022).
+\newblock Flashattention: Fast and memory-efficient exact attention with
+  {IO}-awareness.
+\newblock {\em Advances in Neural Information Processing Systems},
+  35:16344--16359.
+
+\bibitem[Dettmers et~al., 2022]{dettmers2022llm}
+Dettmers, T., Lewis, M., Belkada, Y., and Zettlemoyer, L. (2022).
+\newblock {LLM}.int8(): 8-bit matrix multiplication for transformers at scale.
+\newblock {\em Advances in Neural Information Processing Systems},
+  35:30318--30332.
+
+\bibitem[Frantar et~al., 2022]{frantar2022gptq}
+Frantar, E., Ashkboos, S., Hoefler, T., and Alistarh, D. (2022).
+\newblock {GPTQ}: Accurate post-training quantization for generative
+  pre-trained transformers.
+\newblock {\em arXiv preprint arXiv:2210.17323}.
+
+\bibitem[Gerganov, 2023a]{ggerganov2023gguf}
+Gerganov, G. (2023a).
+\newblock {GGUF} format specification.
+\newblock \url{https://github.com/ggerganov/ggml/blob/master/docs/gguf.md}.
+
+\bibitem[Gerganov, 2023b]{ggerganov2023llama}
+Gerganov, G. (2023b).
+\newblock llama.cpp.
+\newblock \url{https://github.com/ggerganov/llama.cpp}.
+
+\bibitem[Kwon et~al., 2023]{kwon2023efficient}
+Kwon, W., Li, Z., Zhuang, S., Sheng, Y., Zheng, L., Yu, C.~H., Gonzalez, J.,
+  Zhang, H., and Stoica, I. (2023).
+\newblock Efficient memory management for large language model serving with
+  pagedattention.
+\newblock In {\em Proceedings of the 29th Symposium on Operating Systems
+  Principles}, pages 611--626.
+
+\bibitem[Lin et~al., 2023]{lin2023awq}
+Lin, J., Tang, J., Tang, H., Yang, S., Dang, X., and Han, S. (2023).
+\newblock {AWQ}: Activation-aware weight quantization for {LLM} compression and
+  acceleration.
+\newblock {\em arXiv preprint arXiv:2306.00978}.
+
+\bibitem[Liu et~al., 2023]{liu2023scissorhands}
+Liu, Z., Desai, A., Liao, F., Wang, W., Xie, V., Xu, Z., Kyrillidis, A., and
+  Shrivastava, A. (2023).
+\newblock Scissorhands: Exploiting the persistence of importance hypothesis for
+  {LLM} kv cache compression at test time.
+\newblock {\em Advances in Neural Information Processing Systems}, 36.
+
+\bibitem[{NVIDIA}, 2023]{nvidia2023tensorrt}
+{NVIDIA} (2023).
+\newblock {TensorRT-LLM} user guide.
+\newblock \url{https://nvidia.github.io/TensorRT-LLM/}.
+
+\bibitem[Vaswani et~al., 2017]{vaswani2017attention}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.~N.,
+  Kaiser, {\L}., and Polosukhin, I. (2017).
+\newblock Attention is all you need.
+\newblock {\em Advances in Neural Information Processing Systems}, 30.
+
+\bibitem[Xiao et~al., 2023]{xiao2023streamingllm}
+Xiao, G., Tian, Y., Chen, B., Han, S., and Lewis, M. (2023).
+\newblock Efficient streaming language models with attention sinks.
+\newblock {\em arXiv preprint arXiv:2309.17453}.
+
+\bibitem[Zhang et~al., 2023]{zhang2023h2o}
+Zhang, Z., Sheng, Y., Zhou, T., Chen, T., Zheng, L., Cai, R., Song, Z., Tian,
+  Y., Re, C., Barrett, C., et~al. (2023).
+\newblock {H2O}: Heavy-hitter oracle for efficient generative inference of
+  large language models.
+\newblock {\em Advances in Neural Information Processing Systems}, 36.
+
+\end{thebibliography}

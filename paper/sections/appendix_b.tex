@@ -1,0 +1,205 @@
+\section{Appendix B: Configuration Reference}
+\label{appendix:config}
+
+\subsection{M7Config Full Reference}
+
+Complete configuration options for M7Config organized by category:
+
+\begin{table}[h]
+\centering
+\caption{M7Config Hardware Settings}
+\label{tab:m7config_hardware}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+max\_memory\_gb & 24.0 & Maximum usable memory for inference \\
+reserve\_memory\_gb & 4.0 & Memory reserved for OS and system \\
+n\_threads & 8 & Number of CPU threads for inference \\
+n\_batch & 2048 & Batch size for prompt processing \\
+n\_ubatch & 512 & Micro-batch size for efficient tiling \\
+n\_gpu\_layers & 0 & Layers to offload to GPU (0 = CPU only) \\
+main\_gpu & 0 & Primary GPU device index \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{M7Config Model Settings}
+\label{tab:m7config_model}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+model\_id & MiniMax-M2.7 & HuggingFace model identifier \\
+n\_ctx & 194560 & Maximum context window size \\
+quantization & Q4\_K\_M & Weight quantization format \\
+cache\_type\_k & turbo3 & Key cache compression type \\
+cache\_type\_v & turbo3 & Value cache compression type \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{M7Config Performance Settings}
+\label{tab:m7config_perf}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+flash\_attn & True & Enable Flash Attention optimization \\
+use\_mmap & True & Memory-map model weights \\
+use\_mlock & False & Lock memory pages (disable for WSL2) \\
+backend & llama\_cpp & Inference backend selection \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{M7Config Generation Defaults}
+\label{tab:m7config_gen}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+default\_max\_tokens & 512 & Maximum tokens to generate \\
+default\_temperature & 1.0 & Sampling temperature \\
+default\_top\_p & 0.95 & Nucleus sampling threshold \\
+default\_top\_k & 40 & Top-k sampling limit \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{M7Config Feature Flags}
+\label{tab:m7config_features}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+enable\_tools & True & Enable tool calling support \\
+enable\_vision & True & Enable vision/multimodal support \\
+enable\_streaming & True & Enable streaming generation \\
+verbose & False & Enable verbose logging \\
+log\_level & INFO & Logging level (DEBUG, INFO, WARNING, ERROR) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Configuration File Format}
+
+Configuration can be loaded from YAML files:
+
+\textbf{Example Configuration Structure:}
+\begin{itemize}
+    \item Hardware limits: Memory allocation and threading
+    \item Model settings: Context size and quantization
+    \item Performance: Optimization features and backend
+    \item Defaults: Generation parameter defaults
+    \item Features: Enable/disable capabilities
+\end{itemize}
+
+\subsection{Backend Configuration}
+
+Backend-specific settings for fine-tuning:
+
+\subsubsection{llama.cpp Backend}
+
+\textbf{Key Parameters:}
+\begin{itemize}
+    \item \texttt{n\_ctx:} 194560 (context window)
+    \item \texttt{n\_threads:} 8 (CPU threads)
+    \item \texttt{n\_batch:} 2048 (batch size)
+    \item \texttt{n\_ubatch:} 512 (micro-batch)
+    \item \texttt{cache\_type\_k/v:} turbo3 (KV cache compression)
+    \item \texttt{flash\_attn:} true (Flash Attention)
+    \item \texttt{use\_mmap:} true (memory mapping)
+    \item \texttt{use\_mlock:} false (WSL2 limitation)
+    \item \texttt{rope\_freq\_base:} 10000.0 (RoPE base frequency)
+    \item \texttt{rope\_freq\_scale:} 1.0 (RoPE scaling)
+\end{itemize}
+
+\subsubsection{Transformers Backend}
+
+\textbf{Key Parameters:}
+\begin{itemize}
+    \item \texttt{torch\_dtype:} float16 (half precision)
+    \item \texttt{device\_map:} auto (automatic placement)
+    \item \texttt{low\_cpu\_mem\_usage:} true (reduce memory)
+    \item \texttt{attn\_implementation:} eager (attention backend)
+\end{itemize}
+
+\subsection{Quantization Selection Guide}
+
+\begin{table}[h]
+\centering
+\caption{Quantization Selection by Available Memory}
+\label{tab:quant_selection}
+\begin{tabular}{cl}
+\toprule
+\textbf{Available Memory} & \textbf{Recommended Quantization} \\
+\midrule
+$<$ 6 GB & Q3\_K\_M or Q2\_K \\
+6-10 GB & Q4\_K\_M \\
+10-15 GB & Q5\_K\_M \\
+15-20 GB & Q6\_K \\
+$>$ 20 GB & Q8\_0 or FP16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Context Window Sizing}
+
+Recommended context sizes by task:
+
+\begin{itemize}
+    \item \textbf{Chat:} 4K-8K sufficient
+    \item \textbf{Document Q\&A:} 16K-32K
+    \item \textbf{Long document analysis:} 64K-128K
+    \item \textbf{Book-length processing:} 192K (full)
+\end{itemize}
+
+\subsection{Performance Tuning}
+
+\subsubsection{Thread Count}
+
+Recommended thread counts by CPU:
+
+\begin{itemize}
+    \item 4-core: 4 threads
+    \item 6-core: 6 threads
+    \item 8-core: 8 threads
+    \item 12+ core: 8-12 threads (diminishing returns)
+\end{itemize}
+
+\subsubsection{Batch Size}
+
+Batch size impacts:
+
+\begin{itemize}
+    \item Larger batches: Better throughput, higher memory
+    \item Smaller batches: Lower latency, lower memory
+    \item Default 2048 balances both
+\end{itemize}
+
+\subsection{Environment Variables}
+
+\begin{table}[h]
+\centering
+\caption{Environment Variables}
+\label{tab:env_vars}
+\begin{tabular}{lll}
+\toprule
+\textbf{Variable} & \textbf{Description} & \textbf{Default} \\
+\midrule
+MINIFORGE\_CACHE\_DIR & Model cache directory & \textasciitilde/.cache/miniforge \\
+MINIFORGE\_LOG\_LEVEL & Logging level & INFO \\
+MINIFORGE\_LLAMA\_CPP & llama.cpp repo path & None \\
+OMP\_NUM\_THREADS & OpenMP threads & n\_threads \\
+\bottomrule
+\end{tabular}
+\end{table}
