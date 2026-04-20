@@ -392,8 +392,7 @@ Examples:
     from miniforge import Miniforge
 
     model = await Miniforge.from_pretrained(
-        "MiniMaxAI/MiniMax-M2.7",
-        quantization="Q4_K_M",
+        "saricles/MiniMax-M2.7-REAP-172B-A10B-NVFP4-GB10",
     )
 
     # Determine which benchmarks to run

@@ -618,9 +618,9 @@ pull() {
     }
 
     if [[ $SKIP_REAP -eq 0 ]]; then
-        local target="$REAP_MODEL_DIR/MiniMax-M2.7-161B-REAP-GGUF"
-        echo "Pulling MiniMax-M2.7-161B-REAP $REAP_QUANT (~56 GB for Q2_K)."
-        pull_repo '0xSero/MiniMax-M2.7-161B-REAP-GGUF' "*${REAP_QUANT}*.gguf" "$target"
+        local target="$REAP_MODEL_DIR/"
+        echo "Pulling MiniMax-M2.7-REAP-172B-A10B-NVFP4-GB10 (~99 GB)."
+        pull_repo 'saricles/MiniMax-M2.7-REAP-172B-A10B-NVFP4-GB10' "*.safetensors" "$target"
     else
         echo "Skipping REAP (--skip-reap)."
     fi
