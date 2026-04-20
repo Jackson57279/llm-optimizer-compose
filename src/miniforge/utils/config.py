@@ -4,9 +4,15 @@ from typing import Any, Dict, Optional, Union
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 import os
+import platform
 import sys
 import yaml
 import logging
+
+try:
+    import psutil
+except ImportError:  # pragma: no cover
+    psutil = None
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +137,90 @@ class M7Config:
         if self.backend not in valid_backends:
             logger.warning(f"Unknown backend {self.backend}, using llama_cpp")
             self.backend = "llama_cpp"
+
+        # Auto-detect CPU ISA extensions when unspecified.
+        if any(value is None for value in [
+            self.use_avx,
+            self.use_avx2,
+            self.use_avx512,
+            self.use_fma,
+            self.use_f16c,
+        ]):
+            self._apply_cpu_feature_detection()
+
+    @staticmethod
+    def _detect_cpu_flags() -> set[str]:
+        """Attempt to detect CPU ISA flags from the host system."""
+        flags: set[str] = set()
+
+        try:
+            import cpuinfo
+
+            info = cpuinfo.get_cpu_info()
+            raw_flags = info.get("flags", [])
+            if isinstance(raw_flags, str):
+                raw_flags = raw_flags.split()
+            flags = {str(flag).lower() for flag in raw_flags}
+        except Exception:
+            # Fallback to Linux /proc/cpuinfo parsing when cpuinfo is unavailable.
+            if sys.platform.startswith("linux"):
+                try:
+                    with open("/proc/cpuinfo", "r", encoding="utf-8", errors="ignore") as f:
+                        for line in f:
+                            if line.strip().startswith("flags"):
+                                _, value = line.split(":", 1)
+                                flags = {flag.lower() for flag in value.strip().split()}
+                                break
+                except Exception:
+                    pass
+
+        return flags
+
+    def _apply_cpu_feature_detection(self) -> None:
+        """Fill unset CPU ISA extension flags based on detected CPU capabilities."""
+        flags = self._detect_cpu_flags()
+
+        if self.use_avx is None:
+            self.use_avx = "avx" in flags
+        if self.use_avx2 is None:
+            self.use_avx2 = "avx2" in flags
+        if self.use_avx512 is None:
+            self.use_avx512 = any(flag.startswith("avx512") for flag in flags)
+        if self.use_fma is None:
+            self.use_fma = "fma" in flags
+        if self.use_f16c is None:
+            self.use_f16c = "f16c" in flags
+
+    def _apply_system_detection(self) -> None:
+        """Adjust configuration values based on detected system resources."""
+        if psutil is None:
+            logger.warning("psutil not installed; cannot auto-detect system hardware")
+            return
+
+        mem = psutil.virtual_memory()
+        total_gb = mem.total / (1024**3)
+        reserve_gb = max(4.0, total_gb * 0.15)
+
+        self.max_memory_gb = round(max(total_gb - reserve_gb, 0.0), 2)
+        self.reserve_memory_gb = round(reserve_gb, 2)
+
+        logical_cpus = psutil.cpu_count(logical=True) or os.cpu_count() or 1
+        self.n_threads = int(logical_cpus)
+        self.cpu_mask = f"0-{self.n_threads - 1}" if self.n_threads > 1 else "0"
+
+        current_system = platform.uname()
+        if sys.platform == "win32" or "microsoft" in current_system.release.lower():
+            self.use_mlock = False
+
+        # Try to fill missing ISA extension flags now that system metadata is available.
+        self._apply_cpu_feature_detection()
+
+    @classmethod
+    def auto_detect(cls) -> "M7Config":
+        """Create a configuration using runtime hardware detection."""
+        config = cls()
+        config._apply_system_detection()
+        return config
 
     @classmethod
     def performance_preset(cls, preset: str = "balanced") -> "M7Config":
@@ -321,7 +411,7 @@ def load_config(config_path: Optional[Union[str, Path]] = None) -> M7Config:
             logger.info("Loaded config from %s", path)
             return M7Config.from_yaml(path)
 
-    return M7Config()
+    return M7Config.auto_detect()
 
 
 def create_default_config_file(path: Optional[Union[str, Path]] = None) -> Path:
@@ -332,7 +422,7 @@ def create_default_config_file(path: Optional[Union[str, Path]] = None) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    config = M7Config()
+    config = cls.auto_detect()
     config.to_yaml(path)
 
     return path

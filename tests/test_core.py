@@ -97,6 +97,16 @@ def test_backend_config():
     assert "flash_attn" in backend_config
 
 
+def test_auto_detect_config():
+    """Test auto-detected configuration values."""
+    config = M7Config.auto_detect()
+
+    assert config.n_threads >= 1
+    assert config.max_memory_gb > 0
+    assert config.reserve_memory_gb >= 4.0
+    assert config.cpu_mask.startswith("0")
+
+
 def test_generation_defaults():
     """Test generation defaults."""
     config = M7Config(
